@@ -1,0 +1,52 @@
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{fullpage}
+\usepackage{todonotes}
+\usepackage{tabularx,colortbl}
+
+\newenvironment{asigResponsabilidad}[3]
+{ 
+\begin{tabular}{|p{0.8cm}|p{2cm}|p{0.6\textwidth}|p{1cm}|p{0.5cm}|}
+\hline
+\multicolumn{2}{|c|}{\cellcolor{lightgray}Identificador}&\multicolumn{3}{|c|}{\cellcolor{lightgray}Descripción de la acción de alto nivel}\\
+\hline
+\multicolumn{2}{|c|}{#1}&\multicolumn{3}{|l|}{#2}\\
+\hline
+\multicolumn{5}{|c|}{\cellcolor{lightgray}Métodos de alto nivel}\\
+\hline
+\multicolumn{5}{|c|}{#3}\\
+\hline
+\multicolumn{5}{|c|}{\cellcolor{lightgray}Pasos (Usar Pseudocódigo o similar)}\\
+\hline
+}
+{ 
+\end{tabular}
+}
+
+\newcommand{\pasoPseudo}[1]
+{
+\multicolumn{5}{|p{\textwidth}|}{#1}\\
+\hline
+}
+
+\newcommand{\cabeceraMetodosBajoNivel}
+{
+\multicolumn{5}{|c|}{\cellcolor{lightgray}Métodos de bajo nivel necesarios}\\
+\hline
+\textbf{Paso}&\textbf{Clase}&\textbf{Método}&\textbf{Mem. Técn.}&\textbf{IU}\\
+\hline
+}
+
+\newcommand{\pasoCodigo}[5]
+{
+#1&#2&#3&#4&#5\\
+\hline
+}
+
+\newcommand{\diagramaColaboracion}[1]
+{
+\multicolumn{5}{|c|}{\cellcolor{lightgray}Diagrama de Colaboración}\\
+\hline
+\multicolumn{5}{|c|}{\includegraphics[width=0.9\textwidth]{#1}}\\
+\hline
+}
