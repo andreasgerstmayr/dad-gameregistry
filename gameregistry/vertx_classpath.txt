@@ -1,0 +1,7 @@
+src/main/resources
+bin
+out/production/gameregistry
+out/test/gameregistry
+build/deps
+build/classes/main
+build/resources/main
