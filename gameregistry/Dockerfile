@@ -1,5 +1,5 @@
 FROM ubuntu:14.10
-MAINTAINER Rafael Gálvez-Cañero <galvesband@gmail.com>
+MAINTAINER Rafael Gálvez-Cañero <galvesband@gmail.com>, Andreas Gerstmayr <andreas.gerstmayr@gmail.com>
 
 # OpenJDK 8 JRE, unix tools
 RUN DEBIAN_FRONTEND=noninteractive sed -i "/^# deb.*universe/ s/^# //" /etc/apt/sources.list && \
@@ -24,7 +24,7 @@ WORKDIR /home/vertx-user
 RUN vertx install io.vertx~lang-groovy~2.1.1-final
 
 # add packaged module (generated with `./gradlew modZip`)
-ADD build/libs/gameregistry-0.0.1.zip gameregistry.zip
+COPY build/libs/gameregistry-0.0.1.zip gameregistry.zip
 
 # expose ports and start module
 EXPOSE 1080
