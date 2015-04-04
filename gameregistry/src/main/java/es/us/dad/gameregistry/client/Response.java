@@ -1,7 +1,7 @@
 package es.us.dad.gameregistry.client;
 
+import es.us.dad.gameregistry.domain.*;
 import org.vertx.java.core.http.HttpClientResponse;
-import es.us.dad.gameregistry.*;
 
 public class Response {
 	// TODO 

@@ -15,19 +15,19 @@ import com.hazelcast.util.AddressUtil.InvalidAddressException;
  * Helper class to execute requests on a GameRegistry server.
  * 
  * Intended to be used like this:
- * <code>
+ * <pre><code>
  * 	// Create the client
  * 	Client client = new Client(new InetAddress("1.2.3.4", "1080"))
  *                            .setUser(userId)
  *                            .setToken(token);
  *  // Do a request
- *  client.getLastGameSession(new Handler<Response>() {
- *  	@Override
+ *  client.getLastGameSession(new Handler&lt;Response&gt;() {
+ *  	&#64;Override
  *  	public void handle(Response event) {
  *  		// TODO handle a response
  *  	}
  *  });
- * </code>                     
+ * </code></pre>                     
  */
 public class Client {
 	public static final int DEFAULT_PORT = 8080;
