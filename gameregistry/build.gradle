@@ -69,6 +69,23 @@ test {
 }
 
 /*
+ * This makes groovy compile both java and groovy files. This way
+ * both source sets can interop freely. Without this the java Client
+ * classes can't use the groovy ones or the build fails becouse
+ * at java-compile-time the groovy classes are nowhere to be found.
+ */
+sourceSets {
+	main {
+		groovy {
+			srcDirs = ['src/main/groovy', 'src/main/java']
+		}
+		java {
+			srcDirs = []
+		}
+	}
+}
+
+/*
 If you're uploading stuff to Maven, Gradle needs to generate a POM.
 Please edit the details below.
  */
