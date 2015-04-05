@@ -1,5 +1,9 @@
-// Example JSON config file
-
+// Configuration file for local development
+// Configures mongo-persistor to connect to a local mongo instance
 {
-  "foo": "bar"
+  "mongo-persistor" : {
+    "address" : "gameregistry.db",
+    "host" : "localhost",
+    "db_name" : "gameregistry"
+  }
 }

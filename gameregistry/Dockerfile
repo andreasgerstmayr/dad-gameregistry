@@ -20,13 +20,16 @@ ENV PATH /opt/vert.x-2.1.5/bin:$PATH
 USER vertx-user
 WORKDIR /home/vertx-user
 
-# preinstall required vert.x module
-RUN vertx install io.vertx~lang-groovy~2.1.1-final
+# preinstall required vert.x modules
+RUN vertx install io.vertx~lang-groovy~2.1.1-final && \ 
+    vertx install io.vertx~mod-mongo-persistor~2.1.1
 
 # add packaged module (generated with `./gradlew modZip`)
+# and configuration
 COPY build/libs/gameregistry-0.0.1.zip gameregistry.zip
+COPY conf-docker.json conf.json
 
 # expose ports and start module
 EXPOSE 1080
 EXPOSE 8080
-CMD ["vertx", "runZip", "gameregistry.zip"]
+CMD ["vertx", "runZip", "gameregistry.zip", "-conf", "conf.json"]
