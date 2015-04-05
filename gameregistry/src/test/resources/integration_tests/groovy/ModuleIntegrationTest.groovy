@@ -12,18 +12,12 @@ import org.vertx.groovy.testtools.VertxTests
 
 import static org.vertx.testtools.VertxAssert.*
 
-def testHelloWorld() {
+def testRestServerIsRunning() {
     // our module is deployed; no need to start the verticle here
 
-    vertx.createHttpClient().setPort(1080).getNow("/", { HttpClientResponse resp ->
-        assertEquals(200, resp.statusCode)
-
-        resp.bodyHandler { Buffer content ->
-            assertEquals("Hello world.", content.toString())
-
-            // tests are async, we have to notify the test runner that the test has finished
-            testComplete()
-        }
+    vertx.createHttpClient().setPort(8080).getNow("/", { HttpClientResponse resp ->
+        assertEquals(404, resp.statusCode)
+        testComplete()
     })
 }
 
