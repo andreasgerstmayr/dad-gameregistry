@@ -5,5 +5,10 @@
     "address" : "gameregistry.db",
     "host" : "localhost",
     "db_name" : "gameregistry"
+  },
+
+  "game-registry" : {
+    "host" : "localhost",
+    "port" : 8080
   }
 }

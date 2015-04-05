@@ -7,5 +7,10 @@
     // Machine where mongo is running (another docker container, see Readme.md)
     "host" : "mongo-server",
     "db_name" : "gameregistry"
+  },
+
+  "game-registry" : {
+    "host" : "localhost",
+    "port" : 8080
   }
 }
