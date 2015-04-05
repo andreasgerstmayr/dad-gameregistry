@@ -143,6 +143,27 @@ public class Client {
 		
 		return this;
 	}
+
+	public Client startSession(final Handler<Response> handler) {
+		// TODO Needs API definition/review
+		String url = this.host.toString() + ":" + this.port + "/session";
+		// TODO Change to the desired method (post, delete, ...). HttpResponseHandler
+		//      will invoke 'handler' with the parsed http response.
+		HttpClientRequest request = httpClient.post(url, new HttpResponseHandler(handler));
+
+		// TODO
+		// request.exceptionHandler(*an exception event handler that invokes handler with a proper response object*);
+
+		// Sets userId and token as headers
+		addUserTokenToRequest(request);
+
+		// TODO Add any other headers or a body
+
+		// Sends the request
+		request.end();
+
+		return this;
+	}
 	
 	private void addUserTokenToRequest(HttpClientRequest request) {
 		if (!this.userId.isEmpty() && !this.token.isEmpty()) {

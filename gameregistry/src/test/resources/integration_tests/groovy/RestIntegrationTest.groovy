@@ -55,7 +55,7 @@ def testNotFound() {
 def testCreate() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
     createSession(client, { int statusCode, JsonObject data ->
-        assertEquals(200, statusCode)
+        assertEquals(201, statusCode)
 
         retrieveSession(client, data.getString("id"), { int statusCode2, JsonObject data2 ->
             assertEquals(200, statusCode2)
@@ -68,7 +68,7 @@ def testCreate() {
 def testUpdate() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
     createSession(client, { int statusCode, JsonObject data ->
-        assertEquals(200, statusCode)
+        assertEquals(201, statusCode)
 
         updateSession(client, data.getString("id"), { int statusCode2, JsonObject data2 ->
             assertEquals(200, statusCode2)
@@ -81,7 +81,7 @@ def testUpdate() {
 def testDelete() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
     createSession(client, { int statusCode, JsonObject data ->
-        assertEquals(200, statusCode)
+        assertEquals(201, statusCode)
 
         deleteSession(client, data.getString("id"), { int statusCode2, JsonObject data2 ->
             assertEquals(200, statusCode2)

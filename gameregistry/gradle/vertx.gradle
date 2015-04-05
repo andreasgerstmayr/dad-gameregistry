@@ -171,7 +171,7 @@ task collectDeps(type: Copy) {
   }
 }
 
-task runMod(description: 'Run the module', dependsOn: [collectDeps, classes, init]) << {
+task runMod(description: 'Run the module', group: 'vert.x', dependsOn: [collectDeps, classes, init]) << {
   def args = ['runmod', moduleName]
   def args2 = runModArgs.split("\\s+")
   args.addAll(args2)

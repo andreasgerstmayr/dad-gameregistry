@@ -6,15 +6,11 @@
  *
  * This test demonstrates how to do that.
  */
-
-
 import org.vertx.groovy.core.buffer.Buffer
 import org.vertx.groovy.core.http.HttpClientResponse
+import org.vertx.groovy.testtools.VertxTests
 
 import static org.vertx.testtools.VertxAssert.*
-
-import org.vertx.groovy.testtools.VertxTests;
-
 
 def testHelloWorld() {
     // our module is deployed; no need to start the verticle here

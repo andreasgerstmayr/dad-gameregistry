@@ -42,6 +42,10 @@ install - install any jars produced to the local Maven repository (.m2)
 
  */
 
+configurations {
+  groovyDoc
+}
+
 dependencies {
   /*
   Add your module jar dependencies here
@@ -54,9 +58,13 @@ dependencies {
   // If you're creating Groovy compiled verticles you may need the following dependencies
   provided "org.codehaus.groovy:groovy-all:$groovyVersion"
   provided "io.vertx:lang-groovy:$groovyLangModVersion@jar"
-  
+  groovyDoc "org.codehaus.groovy:groovy-all:$groovyVersion"
+
   // Mongo-persistor
   provided "io.vertx:mod-mongo-persistor:2.1.1"
+
+  // reflections
+  compile "org.reflections:reflections:0.9.9"
 
   // If you're creating Scala compiled verticles you may need the following dependencies
   //provided "org.scala-lang:scala-library:$scalaVersion"
@@ -69,6 +77,15 @@ test {
   exclude 'org/boo/**'
   */
 
+}
+
+javadoc {
+  // don't generate javadocs, only groovy docs
+  source = files()
+}
+
+groovydoc {
+  groovyClasspath = configurations.groovyDoc
 }
 
 /*
