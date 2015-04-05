@@ -11,7 +11,11 @@ import org.vertx.groovy.core.http.HttpServerRequest
 class SessionController extends Controller {
 
     // TODO: dependency injection
-    private SessionService sessionService = new SessionService()
+    private final SessionService sessionService
+
+    public SessionController(SessionService sessionService) {
+        this.sessionService = sessionService
+    }
 
     private static void sendJsonResponse(HttpServerRequest req, Object jsonResponse, int statusCode = 200) {
         req.response.putHeader("Content-Type", "application/json")
