@@ -19,9 +19,6 @@ class App extends Verticle {
                 container.logger.error(asyncResult.cause())
             }
         })
-		
-        // java toyrestserver
-        container.deployVerticle(ToyRestServer.class.getName())
 
         // deploy groovy test rest server
         container.deployVerticle("groovy:" + RestServer.class.getName(), gameRegistryConfig, { asyncResult ->
