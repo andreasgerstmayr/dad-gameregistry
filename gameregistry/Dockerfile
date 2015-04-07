@@ -30,6 +30,5 @@ COPY build/libs/gameregistry-0.0.1.zip gameregistry.zip
 COPY conf-docker.json conf.json
 
 # expose ports and start module
-EXPOSE 1080
 EXPOSE 8080
 CMD ["vertx", "runZip", "gameregistry.zip", "-conf", "conf.json"]
