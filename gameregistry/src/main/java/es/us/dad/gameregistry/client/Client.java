@@ -45,9 +45,6 @@ public class Client {
 	private InetAddress host = null;
 	private int port = -1;
 	
-	public String userId = "";
-	public String token = "";
-	
 	public Client(InetAddress host, HttpClient httpClient) throws InvalidAddressException {
 		Initialize(host, DEFAULT_PORT, httpClient);
 	}
@@ -95,22 +92,6 @@ public class Client {
 	}
 	
 	/*
-	 * Sets the user to be used as identification to the gameregistry server.
-	 */
-	public Client setUser(String user) {
-		this.userId = (user == null) ? "" : user.trim();
-		return this;
-	}
-	
-	/*
-	 * Sets the token to be used as identification to the gameregistry server.
-	 */
-	public Client setToken(String token) {
-		this.token = (token == null) ? "" : token.trim();
-		return this;
-	}
-	
-	/*
 	 * Next should be methods to perform requests on the server.
 	 * 
 	 * addSession (GameSession session, ...)
@@ -136,7 +117,7 @@ public class Client {
 	 */
 	
 	// TODO A mock of a typical request method is something like this
-	public Client getLastGameSession(final Handler<Response> handler) {
+	public Client getLastGameSession(String user, String token, final Handler<Response> handler) {
 		// TODO Needs API definition/review
 		String url = this.host.toString() + ":" + this.port + "/sessions/last";
 		// TODO Change to the desired method (post, delete, ...). HttpResponseHandler
@@ -147,7 +128,7 @@ public class Client {
 		// request.exceptionHandler(*an exception event handler that invokes handler with a proper response object*);
 		
 		// Sets userId and token as headers
-		addUserTokenToRequest(request);
+		addUserTokenToRequest(user, token, request);
 		
 		// TODO Add any other headers or a body
 		
@@ -157,7 +138,7 @@ public class Client {
 		return this;
 	}
 
-	public Client startSession(final Handler<Response> handler) {
+	public Client startSession(String user, String token, final Handler<Response> handler) {
 		// TODO Needs API definition/review
 		String url = this.host.toString() + ":" + this.port + "/session";
 		// TODO Change to the desired method (post, delete, ...). HttpResponseHandler
@@ -168,7 +149,7 @@ public class Client {
 		// request.exceptionHandler(*an exception event handler that invokes handler with a proper response object*);
 
 		// Sets userId and token as headers
-		addUserTokenToRequest(request);
+		addUserTokenToRequest(user, token, request);
 
 		// TODO Add any other headers or a body
 
@@ -178,10 +159,10 @@ public class Client {
 		return this;
 	}
 	
-	private void addUserTokenToRequest(HttpClientRequest request) {
-		if (!this.userId.isEmpty() && !this.token.isEmpty()) {
-			request.putHeader(GAMEREGISTRY_USER_HEADER, this.userId)
-				   .putHeader(GAMEREGISTRY_TOKEN_HEADER, this.token);
+	private void addUserTokenToRequest(String user, String token, HttpClientRequest request) {
+		if (!user.isEmpty() && !token.isEmpty()) {
+			request.putHeader(GAMEREGISTRY_USER_HEADER, user)
+				   .putHeader(GAMEREGISTRY_TOKEN_HEADER, token);
 		}
 	}
 	
