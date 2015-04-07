@@ -90,7 +90,7 @@ public class Response {
 			 * 407 Proxy Auth Required
 			 * 408 Request Timeout (the server timed out waiting for the request. The client did not
 			 *     produce a request within the time that the server was prepared to wait)
-			 * 409 Conflict (can't execute request becouse of a conflict in the request... ?)
+			 * 409 Conflict (can't execute request because of a conflict in the request... ?)
 			 * 410 Gone (resource removed for good, clients should not request it, search engines
 			 *     should remove it, ...)
 			 * 411 Length Required (The request did not specify the length of its content, which is 
