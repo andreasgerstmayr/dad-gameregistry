@@ -1,11 +1,9 @@
 package es.us.dad.gameregistry.client;
 
-import org.vertx.java.platform.Verticle;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.http.HttpClientResponse;
-
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -24,14 +22,23 @@ import com.hazelcast.util.AddressUtil.InvalidAddressException;
  *  client.getLastGameSession(new Handler&lt;Response&gt;() {
  *  	&#64;Override
  *  	public void handle(Response event) {
- *  		// TODO handle a response
+ *  		// Handle a response
  *  	}
  *  });
  * </code></pre>                     
  */
 public class Client {
+	/*
+	 * Default client port.
+	 */
 	public static final int DEFAULT_PORT = 8080;
+	/*
+	 * Name of the header used to specify the system user.
+	 */
 	public static final String GAMEREGISTRY_USER_HEADER = "gameregistry-user";
+	/*
+	 * Name of the header used to specify the system token.
+	 */
 	public static final String GAMEREGISTRY_TOKEN_HEADER = "gameregistry-token";
 	
 	private HttpClient httpClient = null;
@@ -87,11 +94,17 @@ public class Client {
 		this.httpClient = httpClient;
 	}
 	
+	/*
+	 * Sets the user to be used as identification to the gameregistry server.
+	 */
 	public Client setUser(String user) {
 		this.userId = (user == null) ? "" : user.trim();
 		return this;
 	}
 	
+	/*
+	 * Sets the token to be used as identification to the gameregistry server.
+	 */
 	public Client setToken(String token) {
 		this.token = (token == null) ? "" : token.trim();
 		return this;
