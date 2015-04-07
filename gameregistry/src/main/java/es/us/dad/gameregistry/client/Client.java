@@ -91,7 +91,7 @@ public class Client {
 		
 		this.port = port;
 		this.host = host;
-		this.httpClient = httpClient;
+		this.httpClient = httpClient.setPort(port);
 	}
 	
 	/*
