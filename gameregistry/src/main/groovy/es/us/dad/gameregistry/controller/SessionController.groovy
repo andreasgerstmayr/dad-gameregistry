@@ -5,10 +5,11 @@ import es.us.dad.gameregistry.service.SessionService
 import es.us.dad.gameregistry.util.DELETE
 import es.us.dad.gameregistry.util.GET
 import es.us.dad.gameregistry.util.POST
-import groovy.json.JsonBuilder
+import es.us.dad.gameregistry.util.PUT
+import io.netty.handler.codec.http.HttpResponseStatus
 import org.vertx.groovy.core.http.HttpServerRequest
 
-class SessionController extends Controller {
+class SessionController extends RestController {
 
     // TODO: dependency injection
     private final SessionService sessionService
@@ -17,17 +18,7 @@ class SessionController extends Controller {
         this.sessionService = sessionService
     }
 
-    private static void sendJsonResponse(HttpServerRequest req, Object jsonResponse, int statusCode = 200) {
-        req.response.putHeader("Content-Type", "application/json")
-        req.response.setStatusCode(statusCode)
-        req.response.end(new JsonBuilder(jsonResponse).toPrettyString())
-    }
-
-    private static void sendNotFoundResponse(HttpServerRequest req, UUID id) {
-        sendJsonResponse(req, [error: "Could not find a game session with id: " + id], 404)
-    }
-
-    @GET("/session/:id")
+    @GET("/sessions/:id")
     public void getSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
         GameSession session = sessionService.getSession(id)
@@ -35,35 +26,34 @@ class SessionController extends Controller {
         if (session != null)
             sendJsonResponse(request, session)
         else
-            sendNotFoundResponse(request, id)
+            sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
     }
 
-    @POST("/session")
-    public void createSession(HttpServerRequest request) {
-        GameSession newSession = sessionService.startSession()
-        sendJsonResponse(request, newSession, 201)
+    @POST("/sessions/:id")
+    public void postSession(HttpServerRequest request) {
+        sendJsonResponse(request, null, HttpResponseStatus.METHOD_NOT_ALLOWED)
     }
 
-    @POST("/session/:id")
-    public void finishSession(HttpServerRequest request) {
+    @PUT("/sessions/:id")
+    public void changeSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
         GameSession session = sessionService.finishSession(id)
 
         if (session != null)
             sendJsonResponse(request, session)
         else
-            sendNotFoundResponse(request, id)
+            sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
     }
 
-    @DELETE("/session/:id")
+    @DELETE("/sessions/:id")
     public void deleteSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
         boolean success = sessionService.deleteSession(id)
 
         if (success)
-            sendJsonResponse(request, [status: "Removed session " + id])
+            sendJsonResponse(request, HttpResponseStatus.NO_CONTENT)
         else
-            sendNotFoundResponse(request, id)
+            sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
     }
 
 }
