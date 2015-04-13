@@ -1,12 +1,13 @@
-package es.us.dad.gameregistry.controller
+package es.us.dad.gameregistry.server.controller
 
-import es.us.dad.gameregistry.domain.GameSession
-import es.us.dad.gameregistry.service.LoginService
-import es.us.dad.gameregistry.service.SessionService
-import es.us.dad.gameregistry.util.DELETE
-import es.us.dad.gameregistry.util.GET
-import es.us.dad.gameregistry.util.POST
-import es.us.dad.gameregistry.util.PUT
+import es.us.dad.gameregistry.server.domain.GameSession
+import es.us.dad.gameregistry.server.service.LoginService
+import es.us.dad.gameregistry.server.service.SessionService
+import es.us.dad.gameregistry.server.util.DELETE
+import es.us.dad.gameregistry.server.util.GET
+import es.us.dad.gameregistry.server.util.POST
+import es.us.dad.gameregistry.server.util.PUT
+
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.vertx.groovy.core.http.HttpServerRequest
 

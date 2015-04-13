@@ -1,6 +1,6 @@
-package es.us.dad.gameregistry.service
+package es.us.dad.gameregistry.server.service
 
-import es.us.dad.gameregistry.domain.GameSession
+import es.us.dad.gameregistry.server.domain.GameSession
 
 class SessionService {
 

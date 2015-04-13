@@ -6,7 +6,6 @@
  *
  * This test demonstrates how to do that.
  */
-import org.vertx.groovy.core.buffer.Buffer
 import org.vertx.groovy.core.http.HttpClientResponse
 import org.vertx.groovy.testtools.VertxTests
 

@@ -1,6 +1,6 @@
 package es.us.dad.gameregistry.client;
 
-import es.us.dad.gameregistry.domain.*;
+import es.us.dad.gameregistry.server.domain.*;
 import org.vertx.java.core.http.HttpClientResponse;
 
 public class Response {

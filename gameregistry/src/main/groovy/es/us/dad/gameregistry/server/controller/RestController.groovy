@@ -1,7 +1,7 @@
-package es.us.dad.gameregistry.controller
+package es.us.dad.gameregistry.server.controller
 
 import es.us.dad.gameregistry.GameRegistryConstants
-import es.us.dad.gameregistry.service.LoginService
+import es.us.dad.gameregistry.server.service.LoginService
 import groovy.json.JsonBuilder
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.vertx.groovy.core.http.HttpServerRequest
