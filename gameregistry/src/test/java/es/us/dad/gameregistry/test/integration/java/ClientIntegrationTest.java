@@ -30,7 +30,7 @@ public class ClientIntegrationTest extends TestVerticle {
     @Test
     public void testClientCreateSession() throws UnknownHostException {
         Client client = new Client(InetAddress.getLocalHost(), vertx.createHttpClient().setPort(8080));
-        client.startSession(new Handler<Response>() {
+        client.startSession("", "", new Handler<Response>() {
 
             @Override
             public void handle(Response event) {

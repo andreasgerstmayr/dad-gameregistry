@@ -11,34 +11,41 @@ import org.vertx.groovy.testtools.VertxTests
 import es.us.dad.gameregistry.RestServer
 
 
+def jsonOrNull(Buffer content) {
+    if (content.length > 0)
+        return new JsonObject(content.toString())
+    else
+        return null
+}
+
 def createSession(HttpClient client, Closure handler) {
-    client.post("/session", { HttpClientResponse resp ->
+    client.post("/sessions", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
-            handler.call(resp.statusCode, new JsonObject(content.toString()))
+            handler.call(resp.statusCode, jsonOrNull(content))
         }
     }).end()
 }
 
 def retrieveSession(HttpClient client, String id, Closure handler) {
-    client.getNow("/session/${id}", { HttpClientResponse resp ->
+    client.get("/sessions/${id}", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
-            handler.call(resp.statusCode, new JsonObject(content.toString()))
+            handler.call(resp.statusCode, jsonOrNull(content))
         }
-    })
+    }).end()
 }
 
 def updateSession(HttpClient client, String id, Closure handler) {
-    client.post("/session/${id}", { HttpClientResponse resp ->
+    client.put("/sessions/${id}", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
-            handler.call(resp.statusCode, new JsonObject(content.toString()))
+            handler.call(resp.statusCode, jsonOrNull(content))
         }
     }).end()
 }
 
 def deleteSession(HttpClient client, String id, Closure handler) {
-    client.delete("/session/${id}", { HttpClientResponse resp ->
+    client.delete("/sessions/${id}", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
-            handler.call(resp.statusCode, new JsonObject(content.toString()))
+            handler.call(resp.statusCode, jsonOrNull(content))
         }
     }).end()
 }
@@ -47,7 +54,6 @@ def testNotFound() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
     retrieveSession(client, "18aef6a4-d415-4a19-8261-fe6c18d8bac0", { int statusCode, JsonObject data ->
         assertEquals(404, statusCode)
-        assertEquals("Could not find a game session with id: 18aef6a4-d415-4a19-8261-fe6c18d8bac0", data.getString("error"))
         testComplete()
     })
 }
@@ -84,7 +90,7 @@ def testDelete() {
         assertEquals(201, statusCode)
 
         deleteSession(client, data.getString("id"), { int statusCode2, JsonObject data2 ->
-            assertEquals(200, statusCode2)
+            assertEquals(204, statusCode2)
 
             retrieveSession(client, data.getString("id"), { int statusCode3, JsonObject data3 ->
                 assertEquals(404, statusCode3)
