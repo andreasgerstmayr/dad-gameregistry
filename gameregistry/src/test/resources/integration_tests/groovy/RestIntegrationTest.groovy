@@ -1,15 +1,13 @@
 package integration_tests.groovy
 
+import es.us.dad.gameregistry.server.RestServer
 import org.vertx.groovy.core.buffer.Buffer
 import org.vertx.groovy.core.http.HttpClient
 import org.vertx.groovy.core.http.HttpClientResponse
+import org.vertx.groovy.testtools.VertxTests
 import org.vertx.java.core.json.JsonObject
 
 import static org.vertx.testtools.VertxAssert.*
-import org.vertx.groovy.testtools.VertxTests
-
-import es.us.dad.gameregistry.RestServer
-
 
 def jsonOrNull(Buffer content) {
     if (content.length > 0)

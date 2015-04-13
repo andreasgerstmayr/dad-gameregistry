@@ -1,11 +1,9 @@
-package es.us.dad.gameregistry.controller
+package es.us.dad.gameregistry.server.controller
 
-import es.us.dad.gameregistry.util.DELETE
-import es.us.dad.gameregistry.util.GET
-import es.us.dad.gameregistry.util.POST
-import es.us.dad.gameregistry.util.PUT
-import groovy.json.JsonBuilder
-import io.netty.handler.codec.http.HttpResponseStatus
+import es.us.dad.gameregistry.server.util.DELETE
+import es.us.dad.gameregistry.server.util.GET
+import es.us.dad.gameregistry.server.util.POST
+import es.us.dad.gameregistry.server.util.PUT
 import org.vertx.groovy.core.http.HttpServerRequest
 import org.vertx.groovy.core.http.RouteMatcher
 

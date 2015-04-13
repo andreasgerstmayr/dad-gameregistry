@@ -1,4 +1,4 @@
-package es.us.dad.gameregistry.service
+package es.us.dad.gameregistry.server.service
 
 class LoginService {
 

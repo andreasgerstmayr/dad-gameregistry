@@ -1,4 +1,4 @@
-package es.us.dad.gameregistry.util
+package es.us.dad.gameregistry.server.util
 
 import java.lang.annotation.ElementType
 import java.lang.annotation.Retention

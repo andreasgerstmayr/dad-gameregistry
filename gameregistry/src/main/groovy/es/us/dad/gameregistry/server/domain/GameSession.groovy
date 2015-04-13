@@ -1,4 +1,4 @@
-package es.us.dad.gameregistry.domain
+package es.us.dad.gameregistry.server.domain
 
 class GameSession {
     //final static private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
