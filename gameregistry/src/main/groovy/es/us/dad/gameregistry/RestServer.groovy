@@ -2,6 +2,7 @@ package es.us.dad.gameregistry
 
 import es.us.dad.gameregistry.controller.SessionController
 import es.us.dad.gameregistry.controller.SessionsController
+import es.us.dad.gameregistry.service.LoginService
 import es.us.dad.gameregistry.service.SessionService
 import org.vertx.groovy.core.http.RouteMatcher
 import org.vertx.groovy.platform.Verticle
@@ -19,9 +20,10 @@ class RestServer extends Verticle {
         RouteMatcher rm = new RouteMatcher()
 
         // create instances of all controllers and register the URLs to the RouteMatcher
+        LoginService loginService = new LoginService()
         SessionService sessionService = new SessionService()
-        new SessionsController(sessionService).registerUrls(rm)
-        new SessionController(sessionService).registerUrls(rm)
+        new SessionsController(loginService, sessionService).registerUrls(rm)
+        new SessionController(loginService, sessionService).registerUrls(rm)
 
         vertx.createHttpServer().requestHandler(rm.asClosure()).listen(port, host)
         container.logger.info("Started GameRegistry REST Server on ${host}:${port}.")

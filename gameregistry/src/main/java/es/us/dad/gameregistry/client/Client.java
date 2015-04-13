@@ -1,5 +1,6 @@
 package es.us.dad.gameregistry.client;
 
+import es.us.dad.gameregistry.GameRegistryConstants;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
@@ -32,14 +33,6 @@ public class Client {
 	 * Default client port.
 	 */
 	public static final int DEFAULT_PORT = 8080;
-	/*
-	 * Name of the header used to specify the system user.
-	 */
-	public static final String GAMEREGISTRY_USER_HEADER = "gameregistry-user";
-	/*
-	 * Name of the header used to specify the system token.
-	 */
-	public static final String GAMEREGISTRY_TOKEN_HEADER = "gameregistry-token";
 	
 	private HttpClient httpClient = null;
 	private InetAddress host = null;
@@ -161,8 +154,8 @@ public class Client {
 	
 	private void addUserTokenToRequest(String user, String token, HttpClientRequest request) {
 		if (!user.isEmpty() && !token.isEmpty()) {
-			request.putHeader(GAMEREGISTRY_USER_HEADER, user)
-				   .putHeader(GAMEREGISTRY_TOKEN_HEADER, token);
+			request.putHeader(GameRegistryConstants.GAMEREGISTRY_USER_HEADER, user)
+				   .putHeader(GameRegistryConstants.GAMEREGISTRY_TOKEN_HEADER, token);
 		}
 	}
 	
