@@ -23,7 +23,7 @@ def createSession(HttpClient client, Closure handler) {
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
-    }).end()
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end()
 }
 
 def retrieveSession(HttpClient client, String id, Closure handler) {
@@ -31,7 +31,7 @@ def retrieveSession(HttpClient client, String id, Closure handler) {
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
-    }).end()
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end()
 }
 
 def updateSession(HttpClient client, String id, Closure handler) {
@@ -39,7 +39,7 @@ def updateSession(HttpClient client, String id, Closure handler) {
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
-    }).end()
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end()
 }
 
 def deleteSession(HttpClient client, String id, Closure handler) {
@@ -47,7 +47,7 @@ def deleteSession(HttpClient client, String id, Closure handler) {
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
-    }).end()
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end()
 }
 
 def testNotFound() {
@@ -98,6 +98,16 @@ def testDelete() {
             })
         })
     })
+}
+
+def testNotAuthenticated() {
+    HttpClient client = vertx.createHttpClient().setPort(8080)
+    client.post("/sessions", { HttpClientResponse resp ->
+        resp.bodyHandler { Buffer content ->
+            assertEquals(403, resp.statusCode)
+            testComplete()
+        }
+    }).end()
 }
 
 VertxTests.initialize(this)
