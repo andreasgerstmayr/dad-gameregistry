@@ -1,0 +1,134 @@
+swagger: '2.0'
+info:
+  title: GameRegistry API
+  description: Nuestro sistema de información tiene que implementar un API Rest a la colección de sesiones de juego.
+  version: "1.0.0"
+# the domain of the service
+host: gameregistry.cloudapp.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /sessions:
+    get:
+      summary: Representa una colección de sesiones de juego.
+      description: |
+        Devuelve una colección de sesiones de juego. Debe aceptar parámetros de filtrado. Esto está aún por definir y dependerá un poco de las necesidades de los subsistemas que necesiten leer colecciones de sesiones de juegos y de sus necesidades de filtrado.
+      parameters:
+        - name: startdate
+          in: query
+          required: true
+          type: number
+          format: datetime
+        - name: enddate
+          in: query
+          required: true
+          type: number
+          format: datetime
+        - name: user
+          in: query
+          required: true
+          type: number
+          format: string
+      tags:
+        - GameSession
+      responses:
+        200:
+          description: una colección de sesiones de juego
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/GameSession'
+    post:
+      summary: Añade una sesión a la colección de sesiones de juego.
+      responses:
+        201:
+          description: la sesión de juego
+          schema:
+            $ref: '#/definitions/GameSession'
+    put:
+      responses:
+        405:
+          description: Method not allowed
+    delete:
+      responses:
+        405:
+          description: Method not allowed
+  /sessions/{id}:
+    get:
+      summary: Devuelve la sesión de juego completa.
+      parameters:
+        - name: id
+          in: path
+          description: el identificador de una sesión de juego
+          required: true
+          type: number
+          format: uuid
+      tags:
+        - GameSession
+      responses:
+        200:
+          description: la sesión de juego
+          schema:
+            $ref: '#/definitions/GameSession'
+    post:
+      parameters:
+        - name: id
+          in: path
+          description: el identificador de una sesión de juego
+          required: true
+          type: number
+          format: uuid
+      responses:
+        405:
+          description: Method not allowed
+    put:
+      summary: Reemplaza la sesión de juego indicada con la proporcionada por la petición.
+      parameters:
+        - name: id
+          in: path
+          description: el identificador de una sesión de juego
+          required: true
+          type: number
+          format: uuid
+      tags:
+        - GameSession
+      responses:
+        200:
+          description: la sesión de juego
+          schema:
+            $ref: '#/definitions/GameSession'
+        404:
+          description: Si la sesión no existe
+    delete:
+      summary: Borra la sesión de juego indicada
+      parameters:
+        - name: id
+          in: path
+          description: el identificador de una sesión de juego
+          required: true
+          type: number
+          format: uuid
+      tags:
+        - GameSession
+      responses:
+        204:
+          description: No content
+        404:
+          description: Si la sesión no existe
+definitions:
+  GameSession:
+    properties:
+      id:
+        type: string
+        description: el identificador de una sesión de juego
+      start:
+        type: string
+        description: El inicio de juego
+      end:
+        type: string
+        description: El término de juego
