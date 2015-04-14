@@ -2320,7 +2320,7 @@
 							"width": 129,
 							"height": 64,
 							"autoResize": false,
-							"text": "POJO clases con la misma esquema de la base de datos",
+							"text": "Clases POJO con el mismo esquema de la base de datos",
 							"wordWrap": true
 						},
 						{
@@ -2362,7 +2362,7 @@
 							"width": 165,
 							"height": 64,
 							"autoResize": false,
-							"text": "La lógica de negocio. Almacenar los sessiones en el base de datos",
+							"text": "La lógica de negocio. Almacenar las sessiones en el base de datos",
 							"wordWrap": true
 						},
 						{
