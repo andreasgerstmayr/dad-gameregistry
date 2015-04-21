@@ -1,0 +1,55 @@
+\chapter{Iteración 3}
+\section{Objetivos de iteración}
+\begin{itemize}
+  \item Integración de Gradle 
+  \item Servidor dockerizado
+  \item Estructura inicial del Cliente vertx.
+\end{itemize}
+
+\section{Gradle}
+\emph{Gradle} es un gestor de construcción especialmente indicado para proyectos
+Java y con soporte para \emph{Groovy}, \emph{Vertx} y \emph{Maven}.
+
+Ha sido integrado mediante el wrapper \texttt{gradlew} que permite utilizar Gradle sin
+instalarlo de forma global en el sistema de desarrollo. La primera vez que se
+lanza descargará todas las bibliotecas necesarias.
+
+En el archivo \textbf{Readme.md} hay información básica sobre como construir el
+proyecto. Algunos comandos útiles:
+
+\begin{itemize}
+ \item Para \textbf{construir} el proyecto: \\
+       \texttt{\$ ./gradlew clean modZip}
+ \item Para \textbf{lanzar} el servidor en la máquina local: \\
+       \texttt{\$ ./gradlew runMod -i}
+ \item Para lanzar los \textbf{tests}: \\
+       \texttt{\$ ./gradlew clean test}
+ \item Para preparar el proyecto para un \textbf{entorno de desarrollo}:
+    \begin{itemize}
+      \item Eclipse: \texttt{\$ ./gradlew eclipse}
+      \item IDEA: \texttt{\$ ./gradlew idea}
+    \end{itemize}
+\end{itemize}
+
+\section{Dockerización}
+\emph{Docker} es una tecnología que permite utilizar contenedores sobre \emph{Linux} para
+ejecutar procesos de forma aislada y con un runtime reproducible.
+
+Nuestro proyecto proporciona un archivo \textbf{Dockerfile} con las instrucciones necesarias
+para construir el contenedor de la aplicación. Además, el archivo \textbf{Readme.md} contiene
+información sobre el procedimiento para lanzar el proyecto en \emph{Docker}. 
+
+El procedimiento para lanzar el servidor con \emph{Docker} ahora mismo es el siguiente:
+
+\begin{itemize}
+ \item Limpiar y contruir el proyecto: \\
+       \texttt{\$ ./gradlew clean modZip}
+ \item Construir el contenedor con el servidor: \\
+       \texttt{\$ docker build -t distributedsystems/gameregistry .} \\
+       (notar el punto final del comando que indica a \emph{Docker} dónde buscar el archivo
+       \emph{Dockerfile} con las instrucciones de construcción). La construcción incluye el 
+       resultado de compilación del proyecto por lo que cada vez que este cambie el contenedor
+       debe ser reconstruido.
+ \item Lanzar el contenedor del servidor: \\
+       \texttt{\$ docker run distributedsystems/gameregistry}
+\end{itemize}
