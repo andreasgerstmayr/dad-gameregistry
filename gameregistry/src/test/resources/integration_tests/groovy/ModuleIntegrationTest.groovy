@@ -8,6 +8,7 @@
  */
 import org.vertx.groovy.core.http.HttpClientResponse
 import org.vertx.groovy.testtools.VertxTests
+import org.vertx.java.core.json.JsonObject
 
 import static org.vertx.testtools.VertxAssert.*
 
@@ -24,10 +25,12 @@ def testRestServerIsRunning() {
 // Make sure you initialize
 VertxTests.initialize(this)
 
+Map<String, Object> testConfig = new JsonObject(new File('conf-test.json').getText('UTF-8')).toMap()
+
 // The script is execute for each test, so this will deploy the module for each one
 // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
 // don't have to hardecode it in your tests
-container.deployModule(System.getProperty("vertx.modulename"), { asyncResult ->
+container.deployModule(System.getProperty("vertx.modulename"), testConfig, { asyncResult ->
     // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
     assertTrue(asyncResult.succeeded)
     assertNotNull("deploymentID should not be null", asyncResult.result())

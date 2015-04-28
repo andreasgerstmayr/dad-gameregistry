@@ -33,8 +33,9 @@ class SessionsController extends RestController {
             return
         }
 
-        GameSession newSession = sessionService.startSession()
-        sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
+        sessionService.startSession({ GameSession newSession ->
+            sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
+        })
     }
 
     @PUT("/sessions")

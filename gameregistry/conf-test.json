@@ -1,0 +1,14 @@
+// Configuration file for local development
+// Configures mongo-persistor to connect to a local mongo instance
+{
+  "mongo-persistor" : {
+    "address" : "gameregistry.db",
+    "host" : "localhost",
+    "db_name" : "gameregistry"
+  },
+
+  "game-registry" : {
+    "host" : "localhost",
+    "port" : 8080
+  }
+}

@@ -109,7 +109,8 @@ def testNotAuthenticated() {
 }
 
 VertxTests.initialize(this)
-container.deployVerticle("groovy:" + RestServer.class.getName(), { asyncResult ->
+Map<String, Object> testConfig = new JsonObject(new File('conf-test.json').getText('UTF-8')).toMap()
+container.deployModule(System.getProperty("vertx.modulename"), testConfig, { asyncResult ->
     assertTrue(asyncResult.succeeded)
     assertNotNull("deploymentID should not be null", asyncResult.result())
     VertxTests.startTests(this)

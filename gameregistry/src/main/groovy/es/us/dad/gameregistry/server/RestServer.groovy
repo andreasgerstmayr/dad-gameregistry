@@ -21,7 +21,7 @@ class RestServer extends Verticle {
 
         // create instances of all controllers and register the URLs to the RouteMatcher
         LoginService loginService = new LoginService()
-        SessionService sessionService = new SessionService()
+        SessionService sessionService = new SessionService(vertx, container.logger)
         new SessionsController(loginService, sessionService).registerUrls(rm)
         new SessionController(loginService, sessionService).registerUrls(rm)
 
