@@ -1,8 +1,9 @@
 package es.us.dad.gameregistry.server.controller
 
 import es.us.dad.gameregistry.GameRegistryConstants
+import es.us.dad.gameregistry.server.domain.DomainObject
 import es.us.dad.gameregistry.server.service.LoginService
-import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.vertx.groovy.core.http.HttpServerRequest
 
@@ -15,17 +16,17 @@ class RestController extends Controller {
         this.loginService = loginService
     }
 
-    protected static void sendJsonResponse(HttpServerRequest request, Object jsonResponse, HttpResponseStatus responseStatus) {
+    protected static void sendJsonResponse(HttpServerRequest request, DomainObject jsonResponse, HttpResponseStatus responseStatus) {
         request.response.putHeader("Content-Type", "application/json")
         request.response.setStatusCode(responseStatus.code())
 
         if (jsonResponse)
-            request.response.end(new JsonBuilder(jsonResponse).toPrettyString())
+            request.response.end(JsonOutput.toJson(jsonResponse.toJsonMap()))
         else
             request.response.end()
     }
 
-    protected static void sendJsonResponse(HttpServerRequest request, Object jsonResponse) {
+    protected static void sendJsonResponse(HttpServerRequest request, DomainObject jsonResponse) {
         sendJsonResponse(request, jsonResponse, HttpResponseStatus.OK)
     }
 

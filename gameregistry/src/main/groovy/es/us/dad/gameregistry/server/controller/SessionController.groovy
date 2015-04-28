@@ -27,12 +27,12 @@ class SessionController extends RestController {
         }
 
         UUID id = UUID.fromString(request.params.get("id"))
-        GameSession session = sessionService.getSession(id)
-
-        if (session != null)
-            sendJsonResponse(request, session)
-        else
-            sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
+        sessionService.getSession(id, { GameSession session ->
+            if (session != null)
+                sendJsonResponse(request, session)
+            else
+                sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
+        })
     }
 
     @POST("/sessions/:id")
@@ -47,12 +47,12 @@ class SessionController extends RestController {
         }
 
         UUID id = UUID.fromString(request.params.get("id"))
-        GameSession session = sessionService.finishSession(id)
-
-        if (session != null)
-            sendJsonResponse(request, session)
-        else
-            sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
+        sessionService.finishSession(id, { GameSession session ->
+            if (session != null)
+                sendJsonResponse(request, session)
+            else
+                sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
+        })
     }
 
     @DELETE("/sessions/:id")
@@ -62,12 +62,12 @@ class SessionController extends RestController {
         }
 
         UUID id = UUID.fromString(request.params.get("id"))
-        boolean success = sessionService.deleteSession(id)
-
-        if (success)
-            sendJsonResponse(request, HttpResponseStatus.NO_CONTENT)
-        else
-            sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
+        sessionService.deleteSession(id, { boolean success ->
+            if (success)
+                sendJsonResponse(request, HttpResponseStatus.NO_CONTENT)
+            else
+                sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
+        })
     }
 
 }
