@@ -1,6 +1,8 @@
 package es.us.dad.gameregistry.server.controller
 
+import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.server.domain.GameSession
+import es.us.dad.gameregistry.server.exception.MethodNotAllowedException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.service.LoginServiceMock
 import es.us.dad.gameregistry.server.service.SessionService
@@ -26,28 +28,29 @@ class SessionsController extends Controller {
     @GET("/sessions")
     public void getSessions(HttpServerRequest request) {
         // TODO: implement this method
-        sendJsonResponse(request, HttpResponseStatus.NOT_IMPLEMENTED)
+        sendErrorResponse(request, new MethodNotAllowedException())
     }
 
     @Authenticated
     @POST("/sessions")
     public void createSession(HttpServerRequest request) {
-        sessionService.startSession({ GameSession newSession ->
-            if (newSession != null)
-                sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
-            else
-                sendJsonResponse(request, newSession, HttpResponseStatus.INTERNAL_SERVER_ERROR)
+        Promise<GameSession> p = sessionService.startSession()
+
+        p.then({ GameSession newSession ->
+            sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
+        }, { Exception ex ->
+            sendErrorResponse(request, ex)
         })
     }
 
     @PUT("/sessions")
     public void changeSessions(HttpServerRequest request) {
-        sendJsonResponse(request, HttpResponseStatus.METHOD_NOT_ALLOWED)
+        sendErrorResponse(request, new MethodNotAllowedException())
     }
 
     @DELETE("/sessions")
     public void deleteSessions(HttpServerRequest request) {
-        sendJsonResponse(request, HttpResponseStatus.METHOD_NOT_ALLOWED)
+        sendErrorResponse(request, new MethodNotAllowedException())
     }
 
 }

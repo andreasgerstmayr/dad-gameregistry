@@ -2,6 +2,7 @@ package es.us.dad.gameregistry.server.controller
 
 import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.server.domain.GameSession
+import es.us.dad.gameregistry.server.exception.MethodNotAllowedException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.service.LoginServiceMock
 import es.us.dad.gameregistry.server.service.SessionService
@@ -27,29 +28,31 @@ class SessionController extends Controller {
     @GET("/sessions/:id")
     public void getSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
-        sessionService.getSession(id, { GameSession session ->
-            if (session != null)
-                sendJsonResponse(request, session)
-            else
-                sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
+        Promise<GameSession> p = sessionService.getSession(id)
+
+        p.then({ GameSession session ->
+            sendJsonResponse(request, session)
+        }, { Exception ex ->
+            sendErrorResponse(request, ex)
         })
     }
 
     @Authenticated
     @POST("/sessions/:id")
     public void postSession(HttpServerRequest request) {
-        sendJsonResponse(request, null, HttpResponseStatus.METHOD_NOT_ALLOWED)
+        sendErrorResponse(request, new MethodNotAllowedException())
     }
 
     @Authenticated
     @PUT("/sessions/:id")
     public void changeSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
-        sessionService.finishSession(id, { GameSession session ->
-            if (session != null)
-                sendJsonResponse(request, session)
-            else
-                sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
+        Promise<GameSession> p = sessionService.finishSession(id)
+
+        p.then({ GameSession session ->
+            sendJsonResponse(request, session)
+        }, { Exception ex ->
+            sendErrorResponse(request, ex)
         })
     }
 
@@ -57,11 +60,11 @@ class SessionController extends Controller {
     @DELETE("/sessions/:id")
     public void deleteSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
-        sessionService.deleteSession(id, { boolean success ->
-            if (success)
-                sendJsonResponse(request, HttpResponseStatus.NO_CONTENT)
-            else
-                sendJsonResponse(request, HttpResponseStatus.NOT_FOUND)
+        Promise<Void> p = sessionService.deleteSession(id)
+        p.then({
+            sendJsonResponse(request, [:], HttpResponseStatus.NO_CONTENT)
+        }, { Exception ex ->
+            sendErrorResponse(request, ex)
         })
     }
 

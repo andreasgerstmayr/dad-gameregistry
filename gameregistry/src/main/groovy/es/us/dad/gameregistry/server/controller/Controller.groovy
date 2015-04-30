@@ -3,6 +3,10 @@ package es.us.dad.gameregistry.server.controller
 import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.GameRegistryConstants
 import es.us.dad.gameregistry.server.domain.DomainObject
+import es.us.dad.gameregistry.server.exception.AuthenticationException
+import es.us.dad.gameregistry.server.exception.MethodNotAllowedException
+import es.us.dad.gameregistry.server.exception.ObjectNotFoundException
+import es.us.dad.gameregistry.server.exception.RestException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.util.Authenticated
 import es.us.dad.gameregistry.server.util.DELETE
@@ -26,22 +30,33 @@ class Controller {
         this.loginService = loginService
     }
 
-    protected static void sendJsonResponse(HttpServerRequest request, DomainObject jsonResponse, HttpResponseStatus responseStatus) {
+    protected static void sendJsonResponse(HttpServerRequest request, Map jsonResponseMap, HttpResponseStatus responseStatus) {
         request.response.putHeader("Content-Type", "application/json")
         request.response.setStatusCode(responseStatus.code())
 
-        if (jsonResponse)
-            request.response.end(JsonOutput.toJson(jsonResponse.toJsonMap()))
+        if (jsonResponseMap)
+            request.response.end(JsonOutput.toJson(jsonResponseMap))
         else
             request.response.end()
+    }
+
+    protected static void sendJsonResponse(HttpServerRequest request, DomainObject jsonResponse, HttpResponseStatus responseStatus) {
+        sendJsonResponse(request, jsonResponse?.toJsonMap(), responseStatus)
+    }
+
+    protected static void sendJsonResponse(HttpServerRequest request, Exception exception, HttpResponseStatus responseStatus) {
+        sendJsonResponse(request, ["error": exception.message], responseStatus)
     }
 
     protected static void sendJsonResponse(HttpServerRequest request, DomainObject jsonResponse) {
         sendJsonResponse(request, jsonResponse, HttpResponseStatus.OK)
     }
 
-    protected static void sendJsonResponse(HttpServerRequest request, HttpResponseStatus responseStatus) {
-        sendJsonResponse(request, null, responseStatus)
+    protected static void sendErrorResponse(HttpServerRequest request, Exception ex) {
+        if (ex instanceof RestException)
+            sendJsonResponse(request, ex, ex.responseStatus)
+        else
+            sendJsonResponse(request, ex, HttpResponseStatus.INTERNAL_SERVER_ERROR)
     }
 
     protected void requireAuthentication(HttpServerRequest request, Closure authenticatedFunction) {
@@ -53,9 +68,9 @@ class Controller {
             if (isAuthenticated)
                 authenticatedFunction.call()
             else
-                sendJsonResponse(request, HttpResponseStatus.FORBIDDEN)
+                sendErrorResponse(request, new AuthenticationException())
         }, { Exception ex ->
-            sendJsonResponse(request, HttpResponseStatus.INTERNAL_SERVER_ERROR)
+            sendErrorResponse(request, ex)
         })
     }
 
