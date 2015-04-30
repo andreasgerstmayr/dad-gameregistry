@@ -1,5 +1,6 @@
 package es.us.dad.gameregistry.server.service
 
+import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.server.domain.DomainObject
 import es.us.dad.gameregistry.server.domain.GameSession
 import org.vertx.groovy.core.Vertx

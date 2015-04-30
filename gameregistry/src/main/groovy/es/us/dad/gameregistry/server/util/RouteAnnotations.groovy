@@ -28,3 +28,8 @@ import java.lang.annotation.Target
 @interface DELETE {
     String value()
 }
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@interface Authenticated {
+}

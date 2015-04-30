@@ -1,8 +1,10 @@
 package es.us.dad.gameregistry.server.controller
 
 import es.us.dad.gameregistry.server.domain.GameSession
-import es.us.dad.gameregistry.server.service.LoginService
+import es.us.dad.gameregistry.server.service.ILoginService
+import es.us.dad.gameregistry.server.service.LoginServiceMock
 import es.us.dad.gameregistry.server.service.SessionService
+import es.us.dad.gameregistry.server.util.Authenticated
 import es.us.dad.gameregistry.server.util.DELETE
 import es.us.dad.gameregistry.server.util.GET
 import es.us.dad.gameregistry.server.util.POST
@@ -11,12 +13,12 @@ import es.us.dad.gameregistry.server.util.PUT
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.vertx.groovy.core.http.HttpServerRequest
 
-class SessionsController extends RestController {
+class SessionsController extends Controller {
 
     // TODO: dependency injection
     private final SessionService sessionService
 
-    public SessionsController(LoginService loginService, SessionService sessionService) {
+    public SessionsController(ILoginService loginService, SessionService sessionService) {
         super(loginService)
         this.sessionService = sessionService
     }
@@ -27,14 +29,14 @@ class SessionsController extends RestController {
         sendJsonResponse(request, HttpResponseStatus.NOT_IMPLEMENTED)
     }
 
+    @Authenticated
     @POST("/sessions")
     public void createSession(HttpServerRequest request) {
-        if (!validateUserAuthentication(request)) {
-            return
-        }
-
         sessionService.startSession({ GameSession newSession ->
-            sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
+            if (newSession != null)
+                sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
+            else
+                sendJsonResponse(request, newSession, HttpResponseStatus.INTERNAL_SERVER_ERROR)
         })
     }
 
