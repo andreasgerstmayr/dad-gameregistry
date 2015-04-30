@@ -103,6 +103,7 @@ def testNotAuthenticated() {
     client.post("/sessions", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
             assertEquals(403, resp.statusCode)
+            assertEquals("""{"error":"Invalid user or token"}""", content.toString())
             testComplete()
         }
     }).end()

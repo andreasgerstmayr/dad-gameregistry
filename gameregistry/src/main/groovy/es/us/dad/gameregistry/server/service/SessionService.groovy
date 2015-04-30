@@ -3,6 +3,8 @@ package es.us.dad.gameregistry.server.service
 import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.server.domain.DomainObject
 import es.us.dad.gameregistry.server.domain.GameSession
+import es.us.dad.gameregistry.server.exception.DatabaseException
+import es.us.dad.gameregistry.server.exception.ObjectNotFoundException
 import org.vertx.groovy.core.Vertx
 import org.vertx.groovy.core.eventbus.Message
 import org.vertx.java.core.logging.Logger
@@ -22,7 +24,9 @@ class SessionService {
      * @param id session id
      * @return game session or {@code null} if game session could not be found
      */
-    public void getSession(UUID id, Closure handler) {
+    public Promise<GameSession> getSession(UUID id) {
+        Promise<GameSession> p = new Promise()
+
         vertx.eventBus.send("gameregistry.db", [action: "find",
                                                 collection: "game_session",
                                                 matcher: [id: id.toString()]]) { Message message ->
@@ -32,23 +36,27 @@ class SessionService {
                 List<Map> results = messageBody["results"]
 
                 if (results.isEmpty())
-                    handler.call(null)
+                    p.reject(new ObjectNotFoundException("GameSession not found."))
                 else
-                    handler.call(new GameSession(results.first()))
+                    p.fulfill(new GameSession(results.first()))
             }
             else {
                 logger.error("Error finding GameSession:")
                 logger.error(messageBody)
-                handler.call(null)
+                p.reject(new DatabaseException(messageBody["message"]))
             }
         }
+
+        return p
     }
 
     /**
      * initializes a new game session
      * @return new game session
      */
-    public void startSession(Closure handler) {
+    public Promise<GameSession> startSession() {
+        Promise<GameSession> p = new Promise()
+
         GameSession session = new GameSession()
         session.setId(UUID.randomUUID())
         session.setStart(new Date())
@@ -59,14 +67,16 @@ class SessionService {
             Map messageBody = message.body
 
             if (messageBody["status"].equals("ok")) {
-                handler.call(session)
+                p.fulfill(session)
             }
             else {
                 logger.error("Error saving GameSession:")
                 logger.error(messageBody)
-                handler.call(null)
+                p.reject(new DatabaseException(messageBody["message"]))
             }
         }
+
+        return p
     }
 
     /**
@@ -74,7 +84,9 @@ class SessionService {
      * @param id session id
      * @return updated game session or {@code null} if game session couldn't be found
      */
-    public void finishSession(UUID id, Closure handler) {
+    public Promise<GameSession> finishSession(UUID id) {
+        Promise<GameSession> p = new Promise()
+
         vertx.eventBus.send("gameregistry.db", [action: "update",
                                                 collection: "game_session",
                                                 criteria: [id: id.toString()],
@@ -85,16 +97,20 @@ class SessionService {
             if (messageBody["status"].equals("ok")) {
                 // successfully updated. now retrieve full object
                 // TODO: optimizable, two db queries aren't very good :)
-                getSession(id, { GameSession session ->
-                    handler.call(session)
+                getSession(id).then({ GameSession session ->
+                    p.fulfill(session)
+                }, { Exception ex ->
+                    p.reject(ex)
                 })
             }
             else {
                 logger.error("Error updating GameSession:")
                 logger.error(messageBody)
-                handler.call(null)
+                p.reject(new DatabaseException(messageBody["message"]))
             }
         }
+
+        return p
     }
 
     /**
@@ -102,21 +118,25 @@ class SessionService {
      * @param id session id
      * @return true if the session is found and deleted, false otherwise
      */
-    public void deleteSession(UUID id, Closure handler) {
+    public Promise<Void> deleteSession(UUID id) {
+        Promise<Void> p = new Promise()
+
         vertx.eventBus.send("gameregistry.db", [action: "delete",
                                                 collection: "game_session",
                                                 matcher: [id: id.toString()]]) { Message message ->
             Map messageBody = message.body
 
             if (messageBody["status"].equals("ok")) {
-                handler.call(true)
+                p.fulfill(null)
             }
             else {
                 logger.error("Error finding GameSession:")
                 logger.error(messageBody)
-                handler.call(false)
+                p.reject(new DatabaseException(messageBody["message"]))
             }
         }
+
+        return p
     }
 
 }
