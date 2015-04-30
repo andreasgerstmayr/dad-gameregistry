@@ -66,6 +66,9 @@ dependencies {
   // reflections
   compile "org.reflections:reflections:0.9.9"
 
+  // promises
+  compile "com.darylteo.vertx:vertx-promises-groovy:1.2.1"
+
   // If you're creating Scala compiled verticles you may need the following dependencies
   //provided "org.scala-lang:scala-library:$scalaVersion"
   //provided "io.vertx:lang-scala:$scalaLangModVersion@jar"

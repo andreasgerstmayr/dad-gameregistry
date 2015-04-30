@@ -2,7 +2,8 @@ package es.us.dad.gameregistry.server
 
 import es.us.dad.gameregistry.server.controller.SessionController
 import es.us.dad.gameregistry.server.controller.SessionsController
-import es.us.dad.gameregistry.server.service.LoginService
+import es.us.dad.gameregistry.server.service.ILoginService
+import es.us.dad.gameregistry.server.service.LoginServiceMock
 import es.us.dad.gameregistry.server.service.SessionService
 import org.vertx.groovy.core.http.RouteMatcher
 import org.vertx.groovy.platform.Verticle
@@ -20,7 +21,7 @@ class RestServer extends Verticle {
         RouteMatcher rm = new RouteMatcher()
 
         // create instances of all controllers and register the URLs to the RouteMatcher
-        LoginService loginService = new LoginService()
+        ILoginService loginService = new LoginServiceMock()
         SessionService sessionService = new SessionService(vertx, container.logger)
         new SessionsController(loginService, sessionService).registerUrls(rm)
         new SessionController(loginService, sessionService).registerUrls(rm)
