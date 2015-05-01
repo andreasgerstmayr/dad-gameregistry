@@ -3,7 +3,7 @@ package es.us.dad.gameregistry.client;
 import es.us.dad.gameregistry.server.domain.*;
 import org.vertx.java.core.http.HttpClientResponse;
 
-public class Response {
+public class GameRegistryResponse {
 	// TODO 
 	public enum ResponseType {
 		OK,
@@ -16,8 +16,8 @@ public class Response {
 	public GameSession [] sessions;
 	public HttpClientResponse innerHttpResponse;
 	
-	public static Response fromHttpResponse(HttpClientResponse response) {
-		Response rval = new Response();
+	public static GameRegistryResponse fromHttpResponse(HttpClientResponse response) {
+		GameRegistryResponse rval = new GameRegistryResponse();
 		rval.innerHttpResponse = response;
 		
 		// If '200 OK' or '201 Created' or '202 Accepted'...
@@ -30,7 +30,7 @@ public class Response {
 	}
 	
 	// 200 OK, 201 Created or 202 Accepted...
-	private static void parseOkResponse(HttpClientResponse response, Response rval) {
+	private static void parseOkResponse(HttpClientResponse response, GameRegistryResponse rval) {
 		// TODO
 		/* From Wikipedia (http://en.wikipedia.org/wiki/List_of_HTTP_status_codes):
 		 * 200 OK
@@ -51,7 +51,7 @@ public class Response {
 		 */
 	}
 	
-	private static void parseNonOkResponse(HttpClientResponse response, Response rval) {
+	private static void parseNonOkResponse(HttpClientResponse response, GameRegistryResponse rval) {
 		// First narrow our status code
 		if (response.statusCode() >= 300 && response.statusCode() < 400) {
 			// Redirection

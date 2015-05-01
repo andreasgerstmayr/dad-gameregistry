@@ -1,7 +1,7 @@
 package es.us.dad.gameregistry.test.integration.java;
 
-import es.us.dad.gameregistry.client.Client;
-import es.us.dad.gameregistry.client.Response;
+import es.us.dad.gameregistry.client.GameRegistryClient;
+import es.us.dad.gameregistry.client.GameRegistryResponse;
 import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
@@ -29,11 +29,11 @@ public class ClientIntegrationTest extends TestVerticle {
 
     @Test
     public void testClientCreateSession() throws UnknownHostException {
-        Client client = new Client(InetAddress.getLocalHost(), vertx.createHttpClient().setPort(8080));
-        client.startSession("", "", new Handler<Response>() {
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx.createHttpClient().setPort(8080));
+        client.startSession("", "", new Handler<GameRegistryResponse>() {
 
             @Override
-            public void handle(Response event) {
+            public void handle(GameRegistryResponse event) {
                 testComplete();
             }
 
