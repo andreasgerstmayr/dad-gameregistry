@@ -28,9 +28,8 @@ class SessionController extends Controller {
     @GET("/sessions/:id")
     public void getSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
-        Promise<GameSession> p = sessionService.getSession(id)
 
-        p.then({ GameSession session ->
+        sessionService.getSession(id).then({ GameSession session ->
             sendJsonResponse(request, session)
         }, { Exception ex ->
             sendErrorResponse(request, ex)
@@ -47,9 +46,8 @@ class SessionController extends Controller {
     @PUT("/sessions/:id")
     public void changeSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
-        Promise<GameSession> p = sessionService.finishSession(id)
 
-        p.then({ GameSession session ->
+        sessionService.finishSession(id).then({ GameSession session ->
             sendJsonResponse(request, session)
         }, { Exception ex ->
             sendErrorResponse(request, ex)
@@ -60,8 +58,8 @@ class SessionController extends Controller {
     @DELETE("/sessions/:id")
     public void deleteSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
-        Promise<Void> p = sessionService.deleteSession(id)
-        p.then({
+
+        sessionService.deleteSession(id).then({
             sendJsonResponse(request, [:], HttpResponseStatus.NO_CONTENT)
         }, { Exception ex ->
             sendErrorResponse(request, ex)
