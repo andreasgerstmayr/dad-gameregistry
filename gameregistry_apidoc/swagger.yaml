@@ -19,20 +19,10 @@ paths:
       description: |
         Devuelve una colección de sesiones de juego. Debe aceptar parámetros de filtrado. Esto está aún por definir y dependerá un poco de las necesidades de los subsistemas que necesiten leer colecciones de sesiones de juegos y de sus necesidades de filtrado.
       parameters:
-        - name: startdate
-          in: query
-          required: true
-          type: number
-          format: datetime
-        - name: enddate
-          in: query
-          required: true
-          type: number
-          format: datetime
         - name: user
           in: query
           required: true
-          type: number
+          type: string
           format: string
       tags:
         - GameSession
@@ -126,6 +116,12 @@ definitions:
       id:
         type: string
         description: el identificador de una sesión de juego
+      user:
+        type: string
+        description: el usuario
+      game:
+        type: string
+        description: el nombre de juego
       start:
         type: string
         description: El inicio de juego

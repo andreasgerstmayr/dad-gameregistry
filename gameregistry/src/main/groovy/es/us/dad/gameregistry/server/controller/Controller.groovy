@@ -4,15 +4,9 @@ import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.GameRegistryConstants
 import es.us.dad.gameregistry.server.domain.DomainObject
 import es.us.dad.gameregistry.server.exception.AuthenticationException
-import es.us.dad.gameregistry.server.exception.MethodNotAllowedException
-import es.us.dad.gameregistry.server.exception.ObjectNotFoundException
 import es.us.dad.gameregistry.server.exception.RestException
 import es.us.dad.gameregistry.server.service.ILoginService
-import es.us.dad.gameregistry.server.util.Authenticated
-import es.us.dad.gameregistry.server.util.DELETE
-import es.us.dad.gameregistry.server.util.GET
-import es.us.dad.gameregistry.server.util.POST
-import es.us.dad.gameregistry.server.util.PUT
+import es.us.dad.gameregistry.server.util.*
 import groovy.json.JsonOutput
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.vertx.groovy.core.http.HttpServerRequest
@@ -30,18 +24,14 @@ class Controller {
         this.loginService = loginService
     }
 
-    protected static void sendJsonResponse(HttpServerRequest request, Map jsonResponseMap, HttpResponseStatus responseStatus) {
+    protected static void sendJsonResponse(HttpServerRequest request, Object jsonResponse, HttpResponseStatus responseStatus) {
         request.response.putHeader("Content-Type", "application/json")
         request.response.setStatusCode(responseStatus.code())
 
-        if (jsonResponseMap)
-            request.response.end(JsonOutput.toJson(jsonResponseMap))
+        if (jsonResponse)
+            request.response.end(JsonOutput.toJson(jsonResponse))
         else
             request.response.end()
-    }
-
-    protected static void sendJsonResponse(HttpServerRequest request, DomainObject jsonResponse, HttpResponseStatus responseStatus) {
-        sendJsonResponse(request, jsonResponse?.toJsonMap(), responseStatus)
     }
 
     protected static void sendJsonResponse(HttpServerRequest request, Exception exception, HttpResponseStatus responseStatus) {
@@ -49,6 +39,10 @@ class Controller {
     }
 
     protected static void sendJsonResponse(HttpServerRequest request, DomainObject jsonResponse) {
+        sendJsonResponse(request, jsonResponse?.toJsonMap(), HttpResponseStatus.OK)
+    }
+
+    protected static void sendJsonResponse(HttpServerRequest request, Map jsonResponse) {
         sendJsonResponse(request, jsonResponse, HttpResponseStatus.OK)
     }
 

@@ -2,6 +2,8 @@ package es.us.dad.gameregistry.server
 
 import es.us.dad.gameregistry.server.controller.SessionController
 import es.us.dad.gameregistry.server.controller.SessionsController
+import es.us.dad.gameregistry.server.repository.ISessionRepository
+import es.us.dad.gameregistry.server.repository.MongoSessionRepository
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.service.LoginServiceMock
 import es.us.dad.gameregistry.server.service.SessionService
@@ -22,7 +24,8 @@ class RestServer extends Verticle {
 
         // create instances of all controllers and register the URLs to the RouteMatcher
         ILoginService loginService = new LoginServiceMock()
-        SessionService sessionService = new SessionService(vertx, container.logger)
+        ISessionRepository sessionRepository = new MongoSessionRepository(vertx, container.logger)
+        SessionService sessionService = new SessionService(vertx, container.logger, sessionRepository)
         new SessionsController(loginService, sessionService).registerUrls(rm)
         new SessionController(loginService, sessionService).registerUrls(rm)
 

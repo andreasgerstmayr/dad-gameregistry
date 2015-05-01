@@ -14,6 +14,7 @@ import org.vertx.testtools.VertxAssert;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Date;
 
 import static org.vertx.testtools.VertxAssert.*;
 
@@ -29,8 +30,10 @@ public class ClientIntegrationTest extends TestVerticle {
 
     @Test
     public void testClientCreateSession() throws UnknownHostException {
-        GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx.createHttpClient().setPort(8080));
-        client.startSession("", "", new Handler<GameRegistryResponse>() {
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx);
+        client.setUser("test");
+        client.setToken("test");
+        client.addSession(new Date(), new Date(), new Handler<GameRegistryResponse>() {
 
             @Override
             public void handle(GameRegistryResponse event) {

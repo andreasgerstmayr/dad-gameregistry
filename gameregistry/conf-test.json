@@ -4,7 +4,7 @@
   "mongo-persistor" : {
     "address" : "gameregistry.db",
     "host" : "localhost",
-    "db_name" : "gameregistry"
+    "db_name" : "gameregistry_test"
   },
 
   "game-registry" : {

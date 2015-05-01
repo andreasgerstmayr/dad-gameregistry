@@ -2,6 +2,7 @@ package integration_tests.groovy
 
 import es.us.dad.gameregistry.server.RestServer
 import org.vertx.groovy.core.buffer.Buffer
+import org.vertx.groovy.core.eventbus.Message
 import org.vertx.groovy.core.http.HttpClient
 import org.vertx.groovy.core.http.HttpClientResponse
 import org.vertx.groovy.testtools.VertxTests
@@ -21,7 +22,7 @@ def createSession(HttpClient client, Closure handler) {
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
-    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end()
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end("""{"game":"test-game"}""")
 }
 
 def retrieveSession(HttpClient client, String id, Closure handler) {
@@ -42,6 +43,14 @@ def updateSession(HttpClient client, String id, Closure handler) {
 
 def deleteSession(HttpClient client, String id, Closure handler) {
     client.delete("/sessions/${id}", { HttpClientResponse resp ->
+        resp.bodyHandler { Buffer content ->
+            handler.call(resp.statusCode, jsonOrNull(content))
+        }
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end()
+}
+
+def findSessions(HttpClient client, String user, Closure handler) {
+    client.get("/sessions?user="+user, { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
@@ -98,6 +107,19 @@ def testDelete() {
     })
 }
 
+def testFindSessions() {
+    HttpClient client = vertx.createHttpClient().setPort(8080)
+    createSession(client, { int statusCode, JsonObject data ->
+        assertEquals(201, statusCode)
+
+        findSessions(client, "testuser", { int statusCode2, JsonObject data2 ->
+            assertEquals(200, statusCode2)
+            assertEquals(1, data2.getInteger("count"))
+            testComplete()
+        })
+    })
+}
+
 def testNotAuthenticated() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
     client.post("/sessions", { HttpClientResponse resp ->
@@ -109,10 +131,24 @@ def testNotAuthenticated() {
     }).end()
 }
 
+def clearDatabase(Closure callback) {
+    vertx.eventBus.send("gameregistry.db", [action: "drop_collection",
+                                            collection: "game_session"]) { Message message ->
+        Map messageBody = message.body
+        assertEquals("ok", messageBody["status"])
+        callback.call()
+    }
+}
+
+
 VertxTests.initialize(this)
 Map<String, Object> testConfig = new JsonObject(new File('conf-test.json').getText('UTF-8')).toMap()
 container.deployModule(System.getProperty("vertx.modulename"), testConfig, { asyncResult ->
     assertTrue(asyncResult.succeeded)
     assertNotNull("deploymentID should not be null", asyncResult.result())
-    VertxTests.startTests(this)
+
+    // clear database before starting each test
+    clearDatabase ({
+        VertxTests.startTests(this)
+    })
 })
