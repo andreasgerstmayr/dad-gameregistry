@@ -1,28 +1,100 @@
 package es.us.dad.gameregistry.client;
 
-import es.us.dad.gameregistry.server.domain.*;
-import org.vertx.java.core.http.HttpClientResponse;
+import java.util.ArrayList;
+import java.util.List;
 
+import es.us.dad.gameregistry.server.domain.*;
+
+import org.vertx.java.core.buffer.Buffer;
+import org.vertx.java.core.http.HttpClientResponse;
+import org.vertx.java.core.json.JsonArray;
+import org.vertx.java.core.json.JsonObject;
+
+/**
+ * Represents a response from a GameRegistry server.
+ * 
+ * @see us.es.dad.gameregistry.client.GameRegistryClient
+ */
 public class GameRegistryResponse {
-	// TODO 
+	/**
+	 * Enumeration listing possible request outcomes.
+	 */
 	public enum ResponseType {
+		/**
+		 * Request was successful.
+		 */
 		OK,
+		/**
+		 * The server did not answer to the request in time.
+		 */
 		TIMEOUT,
+		/**
+		 * Server not found
+		 */
+		UNKNOWN_HOST,
+		/**
+		 * Connection refused by the server
+		 */
+		CONNECTION_REFUSED,
+		/**
+		 * User-token pair invalid
+		 */
 		TOKEN_ERROR,
-		USER_NOT_FOUND
+		/**
+		 * 5xx http response code (ie Gateway Error, Internal Server Error, etc)
+		 */
+		SERVER_ERROR,
+		/**
+		 * Unknown error, unexpected redirection, ...
+		 */
+		UNKNOWN
 	}
 	
+	/**
+	 * Indicates response's nature. 
+	 */
 	public ResponseType responseType;
+	/**
+	 * Any GameSession object returned by the server will be in this array.
+	 */
 	public GameSession [] sessions;
+	/**
+	 * The HttpClientResponse object returned by the server, if any.
+	 */
 	public HttpClientResponse innerHttpResponse;
 	
-	public static GameRegistryResponse fromHttpResponse(HttpClientResponse response) {
+	/**
+	 * Builds a new GameRegistryResponse and sets it up as an UNKNOWN response type, null sessions 
+	 * and null innerHttpResponse.
+	 */
+	GameRegistryResponse() {
+		responseType = ResponseType.UNKNOWN;
+		sessions = null;
+		innerHttpResponse = null;
+	}
+	
+	/**
+	 * Parses an HttpClientResponse returned by a GameRegistryServer.
+	 * 
+	 * The returned response's responseType field signals if the request
+	 * was successful or not. If successful and depending on the request the response can
+	 * include one or more GameSession objects that will be in the sessions field. 
+	 * In the case responseType is not OK the sessions filed will be null.
+	 * 
+	 * In any case the innerHttpResponse field will contain the HttpClientResponse object
+	 * returned by the server with the raw response.
+	 * 
+	 * @param response Http response returned by the GameRegistry server.
+	 * @return Parsed GameRegistryResponse object.
+	 */
+	static GameRegistryResponse fromHttpResponse(HttpClientResponse response, Buffer body) {
 		GameRegistryResponse rval = new GameRegistryResponse();
 		rval.innerHttpResponse = response;
+		rval.sessions = null;
 		
 		// If '200 OK' or '201 Created' or '202 Accepted'...
 		if (response.statusCode() >= 200 && response.statusCode() < 300) 
-			parseOkResponse(response, rval);
+			parseOkResponse(response, body, rval);
 		else 
 			parseNonOkResponse(response, rval);
 		
@@ -30,51 +102,44 @@ public class GameRegistryResponse {
 	}
 	
 	// 200 OK, 201 Created or 202 Accepted...
-	private static void parseOkResponse(HttpClientResponse response, GameRegistryResponse rval) {
-		// TODO
-		/* From Wikipedia (http://en.wikipedia.org/wiki/List_of_HTTP_status_codes):
-		 * 200 OK
-		 * 201 Created (new resource has been created)
-		 * 202 Accepted (request accepted for processing but it has not been completed.
-		 * 203 Non-Authoritative Information (Success, returning info from another source)
-		 * 204 No Content (usual answer to a delete request)
-		 * 205 Reset Content (same as 204 but requires the requester to reset the document view (?))
-		 * 206 Partial Content (only part of the resource served; typical answer to a request 
-		 *     with range header)
-		 * 207 Multi-Status (part of WebDAV; body will be an XML with a number of separate 
-		 *     responses)
-		 * 208 Already Reported (part of WebDAV; members of a DAV binding have already been 
-		 *     enumerated in a previous reply to this request and are not included again)
-		 * 226 IM Used (The server has fulfilled a request for the resource, and the response is a 
-		 *     representation of the result of one or more instance-manipulations applied to the 
-		 *     current instance)
-		 */
+	private static void parseOkResponse(HttpClientResponse response, Buffer body, GameRegistryResponse rval) {
+		rval.responseType = ResponseType.OK;
+		
+		if (body.length() != 0) {
+			try {
+				List<GameSession> sessions = new ArrayList<GameSession>();
+				JsonObject jsonBody = new JsonObject(body.toString());
+			
+				// Find GameSessions and add them to response.sessions 
+				if (jsonBody.isArray()) {
+					// A collection of GameSession objects
+					JsonArray jsonArray = jsonBody.asArray();
+					for (int i = 0; i < jsonArray.size(); i++) {
+						JsonObject jsonSession = jsonArray.get(i);
+						sessions.add(new GameSession(jsonSession.toMap()));
+					}
+				}
+				else if (jsonBody.isObject()) {
+					// A single GameSession
+					sessions.add(new GameSession(jsonBody.toMap()));
+				}
+				
+				rval.sessions = sessions.toArray(rval.sessions);
+			} catch (Exception e) {
+				// TODO Catch any parsing error and set rval accordingly
+			}
+		}
 	}
 	
 	private static void parseNonOkResponse(HttpClientResponse response, GameRegistryResponse rval) {
 		// First narrow our status code
 		if (response.statusCode() >= 300 && response.statusCode() < 400) {
 			// Redirection
-			// TODO
-			/*
-			 * 300 Multiple Choices (Indicates multiple options for the resource that the client 
-			 *     may follow. It, for instance, could be used to present different format 
-			 *     options for video, list files with different extensions, or word sense 
-			 *     disambiguation)
-			 * 301 Moved Permanently (This and all future requests should be directed to the given URI)
-			 * 302 Found (should not be used but some web servers still do... see wiki and 303/307)
-			 * 303 See Other (response to request can be found under another URI using GET)
-			 * 304 Not Modified (resource not modified since the version specified in the request)
-			 * 305 Use Proxy (Requested resource is only available through the provided proxy;
-			 *     Dangerous for security reasons).
-			 * 306 Switch Proxy (no longer used).
-			 * 307 Temporary Redirect (request should be repited with another URI but only this time)
-			 * 308 Permanent Redirect (experimental; all future requests should be to this URI).
-			 */
+			rval.responseType = ResponseType.UNKNOWN;
 		}
 		else if (response.statusCode() >= 400 && response.statusCode() < 500) {
 			// Client Error
-			// TODO
+			// TODO set responsetype accordingly
 			/*
 			 * 400 Bad Request (malformed request syntax, invalid request message framing, ...)
 			 * 401 Unauthorized (similar to 403 but specifically for use when auth is required
@@ -119,7 +184,7 @@ public class GameRegistryResponse {
 		}
 		else if (response.statusCode() >= 500 && response.statusCode() < 600) {
 			// Server Error
-			// TODO
+			// TODO set responsetype accordingly
 			/*
 			 * 500 Internal Server Error
 			 * 501 Not Implemented
@@ -138,7 +203,7 @@ public class GameRegistryResponse {
 		}
 		else {
 			// Should never happen
-			// TODO
+			rval.responseType = ResponseType.UNKNOWN;
 		}
 	}
 }
