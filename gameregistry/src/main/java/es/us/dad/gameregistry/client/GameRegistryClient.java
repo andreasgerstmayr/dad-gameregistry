@@ -1,18 +1,20 @@
 package es.us.dad.gameregistry.client;
 
 import es.us.dad.gameregistry.GameRegistryConstants;
+import es.us.dad.gameregistry.client.GameRegistryResponse.ResponseType;
 import es.us.dad.gameregistry.server.domain.GameSession;
 
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.http.HttpClientResponse;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.Vertx;
+
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.util.Date;
 import java.util.UUID;
 
 import com.hazelcast.util.AddressUtil.InvalidAddressException;
@@ -20,32 +22,43 @@ import com.hazelcast.util.AddressUtil.InvalidAddressException;
 /**
  * Helper class to execute requests on a GameRegistry server.
  * 
- * This class is coded with a fluent interface in mind, as is the HttpClient from vertx.
+ * This class is coded with a fluent interface in mind, as is the HttpClient from vertx. It is
+ * also coded to be used asynchronously.
  * 
  * Intended to be used like this:
  * <pre><code>
- * 	// Create the client (in verticle's Start() method, maybe, making client a member variable)
- *  // In this example the GameRegistry server ip is 1.2.3.4 and it is listening in the port 8080.
+ *  // In verticle's Start() method probably:
+ * 	// Create the client 
+ *  // In this example the GameRegistry server ip is 1.2.3.4 and it is listening in the default port.
  *  InetAddress addr = InetAddress.getByName("1.2.3.4");
- * 	GameRegistryClient client = new GameRegistryClient(addr, 8080, vertx)
+ * 	GameRegistryClient client = new GameRegistryClient(addr, vertx)
  *                                  .setUser(userId)
  *                                  .setToken(token);
  *  ...
  *  
- *  // Somewhere in your code
- *  UUID id = &lt;some session id&gt;;
- *  // Do a request
- *  client.getSession(id, new Handler&lt;GameRegistryResponse&gt;() {
+ *  // Somewhere in your code, an example method that retrieves a session
+ *  // and 'doSomethingWith' it will look like this:
+ *  void requestSomeSession(UUID sessionId) {
+ *    // Do a request
+ *    client.getSession(id, new Handler&lt;GameRegistryResponse&gt;() {
  *  	&#64;Override
  *  	public void handle(GameRegistryResponse response) {
- *  		// Handle a response
+ *        if (response.responseType == ResponseType.OK) {
+ *          // Request was successful
+ *          doSomethingWith(response.sessions[0]);  
+ *        }
+ *        else {
+ *          // Error happened. Check response.responseType value and handle the error
+ *          handleError(response);
+ *        }
  *  	}
- *  });
+ *    });
+ *  }
  * </code></pre> 
  * 
- * Every request made to the GameRegistry server should contain a User-Token pair that
- * will be validated by the server. Set them up using setUser and setToken methods before
- * doing any request or an IllegalArgumentException will be raised
+ * Every request made to the GameRegistry server should contain an User-Token pair that
+ * will be validated by the server through a LoginServer. Set them up using setUser and 
+ * setToken methods before doing any request or an IllegalArgumentException will be raised.
  * 
  * @see GameRegistryResponse
  */
@@ -159,7 +172,7 @@ public class GameRegistryClient {
 		return this;
 	}
 	
-	/* TODO more request methods
+	/* 
 	 * Next should be methods to perform requests on the server. Needs more work, like
 	 * 
 	 * getUserLastSession (user, ...)
@@ -180,11 +193,14 @@ public class GameRegistryClient {
 	 * Creates an HttpClientRequest object and sets it up for the GameRegistryServer.
 	 *  
 	 * @param path Route of the resource. For example "/sessions/1".
-	 * @param method Http method to use in the request.
+	 * @param method Http method to use in the request (GET/POST/PUT/DELETE).
 	 * @param gameRegistryResponseHandler The handler in charge of the response.
 	 * @return The newly created request.
 	 */
 	private HttpClientRequest createHttpRequest(String path, String method, Handler<GameRegistryResponse> gameRegistryResponseHandler) {
+		if (!method.equals("GET") && !method.equals("POST") && !method.equals("PUT") && !method.equals("DELETE"))
+			throw new IllegalArgumentException("Unsuported method: " + method);
+		
 		HttpClientHandlers handlers = new HttpClientHandlers(gameRegistryResponseHandler);
 		HttpClientRequest req = httpClient.request(method, path, handlers.httpHandler());
 		req.exceptionHandler(handlers.exceptionHandler());
@@ -196,6 +212,7 @@ public class GameRegistryClient {
 	// GET /sessions
 	/**
 	 * Requests a collection of GameSessions from the GameRegistry server.
+	 * 
 	 * @param filterParams Filtering options.
 	 * @param responseHandler The handler that will process the response.
 	 * @return This client (fluent interface).
@@ -214,17 +231,40 @@ public class GameRegistryClient {
 	// POST /sessions
 	/**
 	 * Adds a new session to the GameRegistry server.
-	 * @param start Start date of the session
-	 * @param end End date of the session
+	 * 
+	 * The session to be added will get a new identifier when added to the server.
+	 * The previous session id will be ignored.
+	 * 
+	 * The response will contain the new game session with its new UUID.
+	 * 
+	 * Intended use:
+	 * <pre><code>
+	 *  GameRegistryClient client = new GameRegistryClient("1.2.3.4", "8080");
+	 *  
+	 *  GameSession newSession = new GameSession();
+	 *  newSession.game = "MyFunnyGame";
+	 *  newSession.start = new Date(...);
+	 *  newSession.end = new Date(...);
+	 *  newSession.user = userId;
+	 *  
+	 *  client.addSession(session, new Handler&lt;GameRegistryResponse&gt;() {
+	 *    @Override
+	 *    void handle(GameRegistryResponse response) {
+	 *      // Add here code to handle the response (check response.responseType, etc)
+	 *    }
+	 *  });
+	 * </code></pre>
+	 * 
+	 * @param session Session to add.
 	 * @param responseHandler A handler for the server's response.
 	 * @return This client (fluent interface).
 	 */
-	public GameRegistryClient addSession(Date start, Date end, Handler<GameRegistryResponse> responseHandler) {
+	public GameRegistryClient addSession(GameSession session, Handler<GameRegistryResponse> responseHandler) {
 		String url = hostString() + "/sessions";
 		HttpClientRequest req = createHttpRequest(url, "POST", responseHandler);
 		req.headers().set("Content-Type", "application/json");
 		
-		req.end(/* TODO Encode new game session as Json */);
+		req.end(new JsonObject(session.toJsonMap()).toString());
 		
 		return this;
 	}
@@ -338,9 +378,15 @@ public class GameRegistryClient {
 			}
 			
 			@Override
-			public void handle(HttpClientResponse httpResponse) {
-				GameRegistryResponse response = GameRegistryResponse.fromHttpResponse(httpResponse);
-				this.handlers.gameRegistryResponseHandler.handle(response);
+			public void handle(final HttpClientResponse httpResponse) {
+				// We need to parse the response when all the response body is received
+				httpResponse.bodyHandler(new Handler<Buffer>() {
+					@Override
+					public void handle(Buffer body) {
+						GameRegistryResponse response = GameRegistryResponse.fromHttpResponse(httpResponse, body);
+						handlers.gameRegistryResponseHandler.handle(response);
+					}
+				});
 			}
 		}
 		
@@ -358,8 +404,13 @@ public class GameRegistryClient {
 			
 			@Override
 			public void handle(java.lang.Throwable throwable) {
-				// TODO Handle the exception, create an according GameRegistryResponse and
-				// call handlers.gameRegistryHandler.handle(...)
+				GameRegistryResponse rval = new GameRegistryResponse();
+				
+				switch (throwable.getClass().getName()) {
+				// TODO Set rval.responsetype accordingly based on throwable's class name and info
+				}
+				
+				handlers.gameRegistryResponseHandler.handle(rval);
 			}
 		}
 	}
