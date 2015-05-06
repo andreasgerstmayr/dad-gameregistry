@@ -3,15 +3,12 @@ package es.us.dad.gameregistry.test.integration.java;
 import es.us.dad.gameregistry.client.GameRegistryClient;
 import es.us.dad.gameregistry.client.GameRegistryResponse;
 import es.us.dad.gameregistry.server.domain.GameSession;
+
 import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.core.Handler;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpClientResponse;
-import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.testtools.TestVerticle;
-import org.vertx.testtools.VertxAssert;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -34,8 +31,13 @@ public class ClientIntegrationTest extends TestVerticle {
         GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx);
         client.setUser("test");
         client.setToken("test");
+        
         GameSession session = new GameSession();
         session.setStart(new Date());
+        session.setEnd(new Date(session.getStart().getTime() + 1000*60*10)); // Ten minutes after start
+        session.setGame("testGame");
+        session.setUser("testUser");
+        
         client.addSession(session, new Handler<GameRegistryResponse>() {
 
             @Override

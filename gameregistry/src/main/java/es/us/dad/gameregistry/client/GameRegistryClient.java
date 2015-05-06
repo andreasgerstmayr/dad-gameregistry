@@ -83,7 +83,7 @@ public class GameRegistryClient {
 	 * @throws InvalidAddressException
 	 */
 	public GameRegistryClient(InetAddress host, Vertx vertx) throws InvalidAddressException {
-		Initialize(host, DEFAULT_PORT, vertx.createHttpClient());
+		initialize(host, DEFAULT_PORT, vertx.createHttpClient());
 	}
 	
 	/**
@@ -95,7 +95,7 @@ public class GameRegistryClient {
 	 * @throws InvalidAddressException
 	 */
 	public GameRegistryClient(InetAddress host, int port, Vertx vertx) throws InvalidAddressException {
-		Initialize(host, port, vertx.createHttpClient());
+		initialize(host, port, vertx.createHttpClient());
 	}
 	
 	/**
@@ -139,10 +139,10 @@ public class GameRegistryClient {
 			}
 		}
 		
-		Initialize(ip, port, httpClient);
+		initialize(ip, port, httpClient);
 	}
 	
-	private void Initialize(InetAddress host, int port, HttpClient httpClient) throws InvalidAddressException {
+	private void initialize(InetAddress host, int port, HttpClient httpClient) throws InvalidAddressException {
 		if (port < 0 || port > 65535) {
 			throw new InvalidAddressException("Invalid port: " + port);
 		}
@@ -264,7 +264,11 @@ public class GameRegistryClient {
 		HttpClientRequest req = createHttpRequest(url, "POST", responseHandler);
 		req.headers().set("Content-Type", "application/json");
 		
-		req.end(new JsonObject(session.toJsonMap()).toString());
+		// The JsonObject sent to the server should not contain an id, it will get
+		// a new id when added to the collection.
+		JsonObject jsonSession = new JsonObject(session.toJsonMap());
+		jsonSession.removeField("id");
+		req.end(jsonSession.encodePrettily());
 		
 		return this;
 	}

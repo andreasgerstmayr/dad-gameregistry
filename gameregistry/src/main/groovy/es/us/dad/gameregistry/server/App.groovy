@@ -7,8 +7,11 @@ import org.vertx.java.core.Future
 class App extends Verticle {
 
     def startMongoVerticle(Map<String, Object> mongoConfig, Closure deployResult) {
+		def mod_mongo = "io.vertx~mod-mongo-persistor~2.1.1"
+		
+		container.logger.info("Deploying module: ${mod_mongo}")
         // deploy mongodb persistor
-        container.deployModule("io.vertx~mod-mongo-persistor~2.1.1", mongoConfig, { asyncResult ->
+        container.deployModule(mod_mongo, mongoConfig, { asyncResult ->
             if(asyncResult.failed) {
                 container.logger.error("Can't deploy mongo db persistor:")
                 container.logger.error(asyncResult.cause())
@@ -19,10 +22,13 @@ class App extends Verticle {
     }
 
     def startRestServer(Map<String, Object> gameRegistryConfig, Closure deployResult) {
+		def verticle_rest = "groovy:" + RestServer.class.getName()
+		
+		container.logger.info("Deploying GameRegistry REST server (${verticle_rest})...")
         // deploy groovy test rest server
-        container.deployVerticle("groovy:" + RestServer.class.getName(), gameRegistryConfig, { asyncResult ->
+        container.deployVerticle(verticle_rest, gameRegistryConfig, { asyncResult ->
             if(asyncResult.failed) {
-                container.logger.error("Can't deploy game registry:")
+                container.logger.error("Can't deploy ${verticle_rest}:")
                 container.logger.error(asyncResult.cause())
             }
 
@@ -31,7 +37,7 @@ class App extends Verticle {
     }
 
     def start(Future<Void> startedResult) {
-        container.logger.info("Starting GameRegistry...")
+        container.logger.info("Starting...")
 
         Map<String, Object> appConfig = container.config
         Map<String, Object> mongoConfig = appConfig.getOrDefault("mongo-persistor", [:]) as Map<String, Object>
