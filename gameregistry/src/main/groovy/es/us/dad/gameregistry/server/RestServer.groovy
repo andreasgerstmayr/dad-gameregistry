@@ -22,10 +22,11 @@ class RestServer extends Verticle {
 
         RouteMatcher rm = new RouteMatcher()
 
-        // create instances of all controllers and register the URLs to the RouteMatcher
         ILoginService loginService = new LoginServiceMock()
         ISessionRepository sessionRepository = new MongoSessionRepository(vertx, container.logger)
         SessionService sessionService = new SessionService(vertx, container.logger, sessionRepository)
+
+        // create instances of all controllers and register the URLs to the RouteMatcher
         new SessionsController(loginService, sessionService).registerUrls(rm)
         new SessionController(loginService, sessionService).registerUrls(rm)
 

@@ -13,7 +13,6 @@ import org.vertx.java.core.json.JsonObject
 
 class SessionsController extends Controller {
 
-    // TODO: dependency injection
     private final SessionService sessionService
 
     public SessionsController(ILoginService loginService, SessionService sessionService) {

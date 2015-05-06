@@ -16,7 +16,6 @@ import org.vertx.groovy.core.http.HttpServerRequest
 
 class SessionController extends Controller {
 
-    // TODO: dependency injection
     private final SessionService sessionService
 
     public SessionController(ILoginService loginService, SessionService sessionService) {
