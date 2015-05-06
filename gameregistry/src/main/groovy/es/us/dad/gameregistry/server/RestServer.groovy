@@ -31,6 +31,6 @@ class RestServer extends Verticle {
         new SessionController(loginService, sessionService).registerUrls(rm)
 
         vertx.createHttpServer().requestHandler(rm.asClosure()).listen(port, host)
-        container.logger.info("Started GameRegistry REST Server on ${host}:${port}.")
+        container.logger.info("GameRegistry REST Server ready, listening on ${host}:${port}.")
     }
 }
