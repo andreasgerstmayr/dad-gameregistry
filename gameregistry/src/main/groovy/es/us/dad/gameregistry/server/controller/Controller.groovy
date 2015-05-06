@@ -17,7 +17,6 @@ import java.lang.reflect.Method
 
 class Controller {
 
-    // TODO: dependency injection
     private final ILoginService loginService
 
     public Controller(ILoginService loginService) {
