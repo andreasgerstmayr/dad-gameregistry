@@ -2,6 +2,7 @@ package es.us.dad.gameregistry.test.integration.java;
 
 import es.us.dad.gameregistry.client.GameRegistryClient;
 import es.us.dad.gameregistry.client.GameRegistryResponse;
+import es.us.dad.gameregistry.server.domain.GameSession;
 import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
@@ -33,7 +34,9 @@ public class ClientIntegrationTest extends TestVerticle {
         GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx);
         client.setUser("test");
         client.setToken("test");
-        client.addSession(new Date(), new Date(), new Handler<GameRegistryResponse>() {
+        GameSession session = new GameSession();
+        session.setStart(new Date());
+        client.addSession(session, new Handler<GameRegistryResponse>() {
 
             @Override
             public void handle(GameRegistryResponse event) {
