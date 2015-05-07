@@ -2,6 +2,7 @@ package es.us.dad.gameregistry.test.integration.java;
 
 import es.us.dad.gameregistry.client.GameRegistryClient;
 import es.us.dad.gameregistry.client.GameRegistryResponse;
+import es.us.dad.gameregistry.client.GameRegistryResponse.ResponseType;
 import es.us.dad.gameregistry.server.domain.GameSession;
 
 import org.junit.Test;
@@ -32,7 +33,7 @@ public class ClientIntegrationTest extends TestVerticle {
         client.setUser("test");
         client.setToken("test");
         
-        GameSession session = new GameSession();
+        final GameSession session = new GameSession();
         session.setStart(new Date());
         session.setEnd(new Date(session.getStart().getTime() + 1000*60*10)); // Ten minutes after start
         session.setGame("testGame");
@@ -42,11 +43,25 @@ public class ClientIntegrationTest extends TestVerticle {
 
             @Override
             public void handle(GameRegistryResponse event) {
+            	container.logger().info("Server's response: " + event.responseType.toString());
+            	container.logger().info("Http response: " + event.innerHttpResponse.statusCode() + " " + event.innerHttpResponse.statusMessage());
+            	assertTrue(event.responseType == ResponseType.OK);
+            	assertTrue(event.sessions.length == 1);
+            	assertTrue(event.sessions[0].getGame() == "testGame");
+            	assertTrue(event.sessions[0].getUser() == "testUser");
+            	
                 testComplete();
             }
-
         });
     }
+    
+    /*@Test
+    public void testClientGetSession() throws UnknownHostException {
+    	GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx)
+    		.setUser("test")
+    		.setToken("test");
+    	
+    }*/
 
     @Override
     public void start() {
@@ -59,7 +74,7 @@ public class ClientIntegrationTest extends TestVerticle {
             public void handle(AsyncResult<String> asyncResult) {
                 // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
                 if (asyncResult.failed()) {
-                    container.logger().error(asyncResult.cause());
+                    container.logger().error("Failed to deploy " + System.getProperty("vertx.modulename") + ": " + asyncResult.cause());
                 }
                 assertTrue(asyncResult.succeeded());
                 assertNotNull("deploymentID should not be null", asyncResult.result());
