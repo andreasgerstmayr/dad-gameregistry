@@ -9,11 +9,18 @@ import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.json.JsonObject;
 import org.vertx.testtools.TestVerticle;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
+import java.util.Map;
 
 import static org.vertx.testtools.VertxAssert.*;
 
@@ -29,15 +36,15 @@ public class ClientIntegrationTest extends TestVerticle {
 
     @Test
     public void testClientCreateSession() throws UnknownHostException {
-        GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx);
-        client.setUser("test");
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLoopbackAddress(), vertx);
+        client.setUser("testUser");
         client.setToken("test");
         
         final GameSession session = new GameSession();
         session.setStart(new Date());
         session.setEnd(new Date(session.getStart().getTime() + 1000*60*10)); // Ten minutes after start
         session.setGame("testGame");
-        session.setUser("testUser");
+        //session.setUser("testUser");
         
         client.addSession(session, new Handler<GameRegistryResponse>() {
 
@@ -45,10 +52,10 @@ public class ClientIntegrationTest extends TestVerticle {
             public void handle(GameRegistryResponse event) {
             	container.logger().info("Server's response: " + event.responseType.toString());
             	container.logger().info("Http response: " + event.innerHttpResponse.statusCode() + " " + event.innerHttpResponse.statusMessage());
-            	assertTrue(event.responseType == ResponseType.OK);
-            	assertTrue(event.sessions.length == 1);
-            	assertTrue(event.sessions[0].getGame() == "testGame");
-            	assertTrue(event.sessions[0].getUser() == "testUser");
+            	assertEquals(ResponseType.OK, event.responseType);
+            	assertEquals(1, event.sessions.length);
+            	assertEquals("testGame", event.sessions[0].getGame());
+            	assertEquals("testUser", event.sessions[0].getUser());
             	
                 testComplete();
             }
@@ -69,7 +76,17 @@ public class ClientIntegrationTest extends TestVerticle {
         initialize();
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
         // don't have to hardecode it in your tests
-        container.deployModule(System.getProperty("vertx.modulename"), new AsyncResultHandler<String>() {
+
+        JsonObject testConfig = null;
+        try {
+            testConfig = new JsonObject(new String(Files.readAllBytes(Paths.get("conf-test.json"))));
+        }
+        catch (IOException ex) {
+            container.logger().error("Could not read config file");
+            assertTrue(false);
+        }
+
+        container.deployModule(System.getProperty("vertx.modulename"), testConfig, new AsyncResultHandler<String>() {
             @Override
             public void handle(AsyncResult<String> asyncResult) {
                 // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
