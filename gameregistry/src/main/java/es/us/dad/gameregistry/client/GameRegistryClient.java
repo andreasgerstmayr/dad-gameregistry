@@ -260,10 +260,10 @@ public class GameRegistryClient {
 	 * @return This client (fluent interface).
 	 */
 	public GameRegistryClient addSession(GameSession session, Handler<GameRegistryResponse> responseHandler) {
-		String url = hostString() + "/sessions";
+		String url = "/sessions";
 		HttpClientRequest req = createHttpRequest(url, "POST", responseHandler);
 		req.headers().set("Content-Type", "application/json");
-		
+
 		// The JsonObject sent to the server should not contain an id, it will get
 		// a new id when added to the collection.
 		JsonObject jsonSession = new JsonObject(session.toJsonMap());
@@ -324,7 +324,7 @@ public class GameRegistryClient {
 	}
 	
 	private String hostString() {
-		return this.host.toString() + ":" + this.port;
+		return this.host.getHostAddress() + ":" + this.port;
 	}
 	
 	private void addUserTokenToRequest(String user, String token, HttpClientRequest request) throws IllegalArgumentException {

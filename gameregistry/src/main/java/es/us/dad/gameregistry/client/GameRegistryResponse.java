@@ -134,7 +134,7 @@ public class GameRegistryResponse {
 					sessions.add(new GameSession(jsonBody.toMap()));
 				}
 				
-				rval.sessions = sessions.toArray(rval.sessions);
+				rval.sessions = sessions.toArray(new GameSession[0]);
 			} catch (Exception e) {
 				rval.responseType = ResponseType.INVALID_RESPONSE;
 				rval.innerException = e;
