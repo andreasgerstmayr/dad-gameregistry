@@ -45,6 +45,10 @@ public class GameRegistryResponse {
 		 */
 		SERVER_ERROR,
 		/**
+		 * Error while parsing the server's response
+		 */
+		INVALID_RESPONSE,
+		/**
 		 * Unknown error, unexpected redirection, ...
 		 */
 		UNKNOWN
@@ -62,6 +66,11 @@ public class GameRegistryResponse {
 	 * The HttpClientResponse object returned by the server, if any.
 	 */
 	public HttpClientResponse innerHttpResponse;
+	/**
+	 * If the response is not OK and the error is motivated by an exception
+	 * this will have a reference to it. In other case it will be null.
+	 */
+	public Exception innerException;
 	
 	/**
 	 * Builds a new GameRegistryResponse and sets it up as an UNKNOWN response type, null sessions 
@@ -71,6 +80,7 @@ public class GameRegistryResponse {
 		responseType = ResponseType.UNKNOWN;
 		sessions = null;
 		innerHttpResponse = null;
+		innerException = null;
 	}
 	
 	/**
@@ -126,7 +136,8 @@ public class GameRegistryResponse {
 				
 				rval.sessions = sessions.toArray(rval.sessions);
 			} catch (Exception e) {
-				// TODO Catch any parsing error and set rval accordingly
+				rval.responseType = ResponseType.INVALID_RESPONSE;
+				rval.innerException = e;
 			}
 		}
 	}
