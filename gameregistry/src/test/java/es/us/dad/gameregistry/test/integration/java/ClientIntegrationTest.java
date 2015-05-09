@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.vertx.testtools.VertxAssert.*;
 
@@ -34,6 +35,8 @@ import static org.vertx.testtools.VertxAssert.*;
  */
 public class ClientIntegrationTest extends TestVerticle {
 
+    // TODO Test createFromAddress
+
     @Test
     public void testClientCreateSession() throws UnknownHostException {
         GameRegistryClient client = new GameRegistryClient(InetAddress.getLoopbackAddress(), vertx);
@@ -46,29 +49,107 @@ public class ClientIntegrationTest extends TestVerticle {
         session.setGame("testGame");
         //session.setUser("testUser");
         
-        client.addSession(session, new Handler<GameRegistryResponse>() {
+        client.addSession(session, event -> {
+            assertEquals(ResponseType.OK, event.responseType);
+            assertNotNull(event.sessions);
+            assertEquals(1, event.sessions.length);
+            assertEquals("testGame", event.sessions[0].getGame());
+            assertEquals("testUser", event.sessions[0].getUser());
 
-            @Override
-            public void handle(GameRegistryResponse event) {
-            	container.logger().info("Server's response: " + event.responseType.toString());
-            	container.logger().info("Http response: " + event.innerHttpResponse.statusCode() + " " + event.innerHttpResponse.statusMessage());
-            	assertEquals(ResponseType.OK, event.responseType);
-            	assertEquals(1, event.sessions.length);
-            	assertEquals("testGame", event.sessions[0].getGame());
-            	assertEquals("testUser", event.sessions[0].getUser());
-            	
-                testComplete();
-            }
+            testComplete();
         });
     }
     
-    /*@Test
+    @Test
     public void testClientGetSession() throws UnknownHostException {
     	GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx)
-    		.setUser("test")
+    		.setUser("testUser")
     		.setToken("test");
-    	
-    }*/
+
+        // Create a sesion
+        final GameSession session = new GameSession();
+        session.setStart(new Date());
+        session.setEnd(new Date(session.getStart().getTime() + 1000 * 60 * 10)); // Ten minutes after start
+        session.setGame("testGame");
+
+        // Add the session
+        client.addSession(session, event -> {
+            // And ask the server for a session with the id of the added session
+            assertEquals(ResponseType.OK, event.responseType);
+            assertEquals(1, event.sessions.length);
+            UUID id = event.sessions[0].getId();
+            client.getSession(id, event2 -> {
+                assertEquals(ResponseType.OK, event2.responseType);
+                assertNotNull(event2.sessions);
+                assertEquals(1, event2.sessions.length);
+
+                GameSession receivedSession = event2.sessions[0];
+                assertEquals(id, receivedSession.getId());
+                assertEquals("testUser", receivedSession.getUser());
+                assertEquals("testGame", receivedSession.getGame());
+
+                testComplete();
+            });
+        });
+    }
+
+    @Test
+    public void testClientGetSessionNotFound() throws UnknownHostException {
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx)
+                .setUser("testUser")
+                .setToken("test");
+
+        UUID id = UUID.randomUUID();
+        client.getSession(id, event -> {
+            assertEquals(ResponseType.SESSION_NOT_FOUND, event.responseType);
+            assertEquals(0, event.sessions.length);
+
+            testComplete();
+        });
+    }
+
+    @Test
+    public void testClientDeleteSession() throws UnknownHostException {
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx)
+                .setUser("testUser")
+                .setToken("test");
+
+        // Create a sesion
+        final GameSession session = new GameSession();
+        session.setStart(new Date());
+        session.setEnd(new Date(session.getStart().getTime() + 1000 * 60 * 10)); // Ten minutes after start
+        session.setGame("testGame");
+
+        // Add the session
+        client.addSession(session, event -> {
+            // And ask the server for a session with the id of the added session
+            assertEquals(ResponseType.OK, event.responseType);
+            assertEquals(1, event.sessions.length);
+            UUID id = event.sessions[0].getId();
+            client.deleteSession(id, event2 -> {
+                assertEquals(ResponseType.OK, event2.responseType);
+                assertNotNull(event2.sessions);
+                assertEquals(0, event2.sessions.length);
+
+                testComplete();
+            });
+        });
+    }
+
+    @Test
+    public void testClientDeleteSessionNotFound() throws UnknownHostException {
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx)
+                .setUser("testUser")
+                .setToken("test");
+
+        UUID id = UUID.randomUUID();
+        client.deleteSession(id, event -> {
+            assertEquals(ResponseType.SESSION_NOT_FOUND, event.responseType);
+            assertEquals(0, event.sessions.length);
+
+            testComplete();
+        });
+    }
 
     @Override
     public void start() {

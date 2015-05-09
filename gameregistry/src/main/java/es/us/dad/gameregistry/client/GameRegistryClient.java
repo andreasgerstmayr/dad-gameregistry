@@ -1,20 +1,20 @@
 package es.us.dad.gameregistry.client;
 
 import es.us.dad.gameregistry.GameRegistryConstants;
-import es.us.dad.gameregistry.client.GameRegistryResponse.ResponseType;
 import es.us.dad.gameregistry.server.domain.GameSession;
 
+import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
+import org.vertx.java.core.dns.DnsClient;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.http.HttpClientResponse;
+import org.vertx.java.core.impl.DefaultFutureResult;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.Vertx;
 
-import java.net.InetAddress;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.UUID;
 
 import com.hazelcast.util.AddressUtil.InvalidAddressException;
@@ -73,7 +73,68 @@ public class GameRegistryClient {
 	private int port = -1;
 	private String user = "";
 	private String token = "";
-	
+
+    /**
+     * Creates a GameRegistryClient performing an asynchronous DNS lookup.
+     *
+     * This method is usefull if you want to create a new GameResgitryClient but only
+     * knows its host name, not its ip address. This case requires an asynchronous DNS
+     * lookup.
+     *
+     * Example follows:
+     *
+     * <pre><code>
+     *     GameRegistryClient.createFromAddress("gameregistry.cloudapp.net:8080", new Handler&lt;AsyncResult&lt;GameRegistryClient&gt;&gt;() {
+     *         &#64;Override
+     *         public void handle(AsyncResult&lt;GameRegistryClient&gt; result) {
+     *             if (result.succeeded()) {
+     *                 GameRegistryClient myClient = result.result();
+     *                 // Do stuff with the client.
+     *             }
+     *             else {
+     *                 // result.cause() returns an exception describing the problem.
+     *             }
+     *         }
+     *     }
+     * </code></pre>
+     *
+     * @param address String with the GameRegistry server's address (ie "gameregistry,cloudapp.net:8080")
+     * @param vertx A Vertx instance to create the Dns client and the GameRegistryClient.
+     * @param resultHandler To handle the result
+     * @throws UnknownHostException
+     * @throws URISyntaxException
+     */
+    static void createFromAddress(String address, Vertx vertx, Handler<AsyncResult<GameRegistryClient>> resultHandler) throws UnknownHostException, URISyntaxException {
+        int port;
+        int colonsIndex = address.indexOf(':');
+
+        if (colonsIndex == -1)
+            port = DEFAULT_PORT;
+        else {
+            try {
+                port = Integer.parseInt(address.substring(colonsIndex + 1));
+            } catch (Exception e) {
+                // Fail the async result becouse port is not a number
+                resultHandler.handle(new AsyncResultImpl<>(e));
+                return;
+            }
+        }
+
+        DnsClient dnsClient = vertx.createDnsClient(new InetSocketAddress("10.0.0.1", 53));
+        dnsClient.lookup(address, new Handler<AsyncResult<InetAddress>>() {
+            @Override
+            public void handle(AsyncResult<InetAddress> lookUpResult) {
+                if (lookUpResult.succeeded()) {
+                    // Succeed our async result with a new GameRegistryClienet
+                    resultHandler.handle(new AsyncResultImpl<>(new GameRegistryClient(lookUpResult.result(), port, vertx)));
+                } else {
+                    // Fail
+                    resultHandler.handle(new AsyncResultImpl<>(lookUpResult.cause()));
+                }
+            }
+        });
+    }
+
 	/**
 	 * Builds a new GameRegistryClient.
 	 * 
@@ -96,50 +157,6 @@ public class GameRegistryClient {
 	 */
 	public GameRegistryClient(InetAddress host, int port, Vertx vertx) throws InvalidAddressException {
 		initialize(host, port, vertx.createHttpClient());
-	}
-	
-	/**
-	 * Builds a new GameRegistryClient.
-	 * 
-	 * This constructor expects the host address as a string of the form "&lt;host&gt;:&lt;port&gt;",
-	 * where host is the textual representation of the ip address (ie "1.2.3.4") or a host name
-	 * like "gameregistry.cloudall.net" and port is a number between 0 and 65535 (by default, 
-	 * GameRegistry servers listen on 8080).
-	 * 
-	 * Warning: this constructor does a synchronous DNS resolve if the address parameter
-	 * contains an unresolved host name. Use an IP to avoid it, or use 
-	 * org.vertx.java.core.dns.DnsClient to do a DNS resolve of name asynchronously.
-	 * 
-	 * @param address Textual representation of the host address.
-	 * @param vertx Vertx instance, used to create an HttpClient.
-	 * @throws URISyntaxException Invalid port
-	 * @throws InvalidAddressException Something is wrong with the address
-	 * @throws UnknownHostException Unable to resolve the host name
-	 */
-	public GameRegistryClient(String address, Vertx vertx) throws URISyntaxException, InvalidAddressException, UnknownHostException {
-		int port;
-		InetAddress ip;
-		
-		int colonsIndex = address.indexOf(':');
-		if (colonsIndex == -1) {
-			port = DEFAULT_PORT;
-			ip = InetAddress.getByName(address);
-		}
-		else {
-			try {
-				port = Integer.parseInt(address.substring(colonsIndex + 1));
-				// This might do a synchronous DNS resolve if contains an unresolved host name
-				ip = InetAddress.getByName(address.substring(0, colonsIndex - 1));
-			} 
-			catch(NumberFormatException e) { 
-				throw new URISyntaxException(address, "Invalid port number.");
-			}
-			catch(Exception e) {
-				throw new InvalidAddressException(e.toString());
-			}
-		}
-		
-		initialize(ip, port, httpClient);
 	}
 	
 	private void initialize(InetAddress host, int port, HttpClient httpClient) throws InvalidAddressException {
@@ -200,7 +217,7 @@ public class GameRegistryClient {
 	private HttpClientRequest createHttpRequest(String path, String method, Handler<GameRegistryResponse> gameRegistryResponseHandler) {
 		if (!method.equals("GET") && !method.equals("POST") && !method.equals("PUT") && !method.equals("DELETE"))
 			throw new IllegalArgumentException("Unsuported method: " + method);
-		
+
 		HttpClientHandlers handlers = new HttpClientHandlers(gameRegistryResponseHandler);
 		HttpClientRequest req = httpClient.request(method, path, handlers.httpHandler());
 		req.exceptionHandler(handlers.exceptionHandler());
@@ -281,7 +298,7 @@ public class GameRegistryClient {
 	 * @return This client.
 	 */
 	public GameRegistryClient getSession(UUID sessionId, Handler<GameRegistryResponse> responseHandler) {
-		String url = hostString() + "/session/" + sessionId;
+		String url = "/sessions/" + sessionId.toString();
 		HttpClientRequest req = createHttpRequest(url, "GET", responseHandler);
 		req.end();
 		
@@ -300,7 +317,7 @@ public class GameRegistryClient {
 	 * @return This client.
 	 */
 	public GameRegistryClient updateSession(GameSession session, Handler<GameRegistryResponse> responseHandler) {
-		String url = hostString() + "/session/" + session.getId();
+		String url = "/sessions/" + session.getId();
 		HttpClientRequest req = createHttpRequest(url, "PUT", responseHandler);
 		req.headers().set("Content-Type", "application/json");
 		req.end(new JsonObject(session.toJsonMap()).toString());
@@ -316,7 +333,7 @@ public class GameRegistryClient {
 	 * @return This client.
 	 */
 	public GameRegistryClient deleteSession(UUID sessionId, Handler<GameRegistryResponse> responseHandler) {
-		String url = hostString() + "/session/" + sessionId;
+		String url = "/sessions/" + sessionId;
 		HttpClientRequest req = createHttpRequest(url, "DELETE", responseHandler);
 		req.end();
 		
@@ -371,8 +388,8 @@ public class GameRegistryClient {
 		
 		/**
 		 * An HttpClientResponse handler that parses the response into a GameRegistryResponse
-		 * and call a handler for that. 
-		 * @see GameRegistryClient.HttpClientHandlers.httpHandler
+		 * and call a handler for that.
+         * @see es.us.dad.gameregistry.client.GameRegistryClient.HttpClientHandlers
 		 */
 		private class ResponseHandler implements Handler<HttpClientResponse> {
 			private HttpClientHandlers handlers;
@@ -397,7 +414,7 @@ public class GameRegistryClient {
 		/**
 		 * A Throwable handler that creates a GameRegistryResponse object signaling an
 		 * error and calls a handler for it.
-		 * @see GameRegistryClient.HttpClientHandlers.exceptionHandler
+         * @see es.us.dad.gameregistry.client.GameRegistryClient.HttpClientHandlers
 		 */
 		private class ExceptionHandler implements Handler<java.lang.Throwable> {
 			private HttpClientHandlers handlers;
@@ -418,4 +435,42 @@ public class GameRegistryClient {
 			}
 		}
 	}
+
+    static class AsyncResultImpl<T> implements AsyncResult<T> {
+        private T _result;
+        private Throwable _exception;
+        private boolean _succeded;
+
+        public AsyncResultImpl(T t) {
+            _result = t;
+            _succeded = true;
+            _exception = null;
+        }
+
+        public AsyncResultImpl(Throwable e) {
+            _result = null;
+            _succeded = false;
+            _exception = e;
+        }
+
+        @Override
+        public T result() {
+            return _result;
+        }
+
+        @Override
+        public Throwable cause() {
+            return _exception;
+        }
+
+        @Override
+        public boolean succeeded() {
+            return _succeded;
+        }
+
+        @Override
+        public boolean failed() {
+            return !_succeded;
+        }
+    }
 }

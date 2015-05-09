@@ -79,7 +79,10 @@ class MongoSessionRepository implements ISessionRepository {
             Map messageBody = message.body
 
             if (messageBody["status"].equals("ok")) {
-                p.fulfill(null)
+                if (messageBody["number"] == 1)
+                    p.fulfill(void)
+                else
+                    p.reject(new ObjectNotFoundException("GameSession not found."));
             }
             else {
                 DatabaseException ex = prepareAndLogException(messageBody)

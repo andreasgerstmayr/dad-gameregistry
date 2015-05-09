@@ -13,7 +13,7 @@ import org.vertx.java.core.json.JsonObject;
 /**
  * Represents a response from a GameRegistry server.
  * 
- * @see us.es.dad.gameregistry.client.GameRegistryClient
+ * @see GameRegistryClient
  */
 public class GameRegistryResponse {
 	/**
@@ -24,6 +24,12 @@ public class GameRegistryResponse {
 		 * Request was successful.
 		 */
 		OK,
+		/**
+		 * Server says 404 Not Found. Ussually means the sessions the client asked
+         * for is not found but it can also means the server is not a GameRegistry
+         * compatible server and the resource's path is not recognized.
+		 */
+		SESSION_NOT_FOUND,
 		/**
 		 * The server did not answer to the request in time.
 		 */
@@ -45,7 +51,11 @@ public class GameRegistryResponse {
 		 */
 		SERVER_ERROR,
 		/**
-		 * Error while parsing the server's response
+		 * Error while parsing the server's response. An invalid JSon,
+         * an unexpected http status code (ie a 405 MethodNotAllowed in
+         * a resource's path that should allow that method),.. It can also
+         * means the GameRegistryClient has a bug and performed a
+         * bad request.
 		 */
 		INVALID_RESPONSE,
 		/**
@@ -64,6 +74,7 @@ public class GameRegistryResponse {
 	public GameSession [] sessions;
 	/**
 	 * The HttpClientResponse object returned by the server, if any.
+     * Otherwise null.
 	 */
 	public HttpClientResponse innerHttpResponse;
 	/**
@@ -78,7 +89,7 @@ public class GameRegistryResponse {
 	 */
 	GameRegistryResponse() {
 		responseType = ResponseType.UNKNOWN;
-		sessions = null;
+		sessions = new GameSession[0];
 		innerHttpResponse = null;
 		innerException = null;
 	}
@@ -100,7 +111,6 @@ public class GameRegistryResponse {
 	static GameRegistryResponse fromHttpResponse(HttpClientResponse response, Buffer body) {
 		GameRegistryResponse rval = new GameRegistryResponse();
 		rval.innerHttpResponse = response;
-		rval.sessions = null;
 		
 		// If '200 OK' or '201 Created' or '202 Accepted'...
 		if (response.statusCode() >= 200 && response.statusCode() < 300) 
@@ -117,7 +127,7 @@ public class GameRegistryResponse {
 		
 		if (body.length() != 0) {
 			try {
-				List<GameSession> sessions = new ArrayList<GameSession>();
+				List<GameSession> sessions = new ArrayList<>();
 				JsonObject jsonBody = new JsonObject(body.toString());
 			
 				// Find GameSessions and add them to response.sessions 
@@ -134,7 +144,7 @@ public class GameRegistryResponse {
 					sessions.add(new GameSession(jsonBody.toMap()));
 				}
 				
-				rval.sessions = sessions.toArray(new GameSession[0]);
+				rval.sessions = sessions.toArray(new GameSession[sessions.size()]);
 			} catch (Exception e) {
 				rval.responseType = ResponseType.INVALID_RESPONSE;
 				rval.innerException = e;
@@ -150,67 +160,24 @@ public class GameRegistryResponse {
 		}
 		else if (response.statusCode() >= 400 && response.statusCode() < 500) {
 			// Client Error
-			// TODO set responsetype accordingly
-			/*
-			 * 400 Bad Request (malformed request syntax, invalid request message framing, ...)
-			 * 401 Unauthorized (similar to 403 but specifically for use when auth is required
-			 *     and has failed or has not yet been provided).
-			 * 402 Payment Required (reserved for future use)
-			 * 403 Forbidden (Requested resource refuses to respond, but here authentication
-			 *     will make no difference).
-			 * 404 Not Found (but might be there in the future)
-			 * 405 Method Not Allowed (A request was made of a resource using a method not supported
-			 *     by that resource).
-			 * 406 Not Acceptable (the resource is only available as content not acceptable according
-			 *     to the Accept headers in the request)
-			 * 407 Proxy Auth Required
-			 * 408 Request Timeout (the server timed out waiting for the request. The client did not
-			 *     produce a request within the time that the server was prepared to wait)
-			 * 409 Conflict (can't execute request because of a conflict in the request... ?)
-			 * 410 Gone (resource removed for good, clients should not request it, search engines
-			 *     should remove it, ...)
-			 * 411 Length Required (The request did not specify the length of its content, which is 
-			 *     required by the requested resource)
-			 * 412 Preconfition Failed 
-			 * 413 Request Entity Too Large
-			 * 414 Request-URI Too Long
-			 * 415 Unsupported Media Type
-			 * 416 Requested Range Not Satisfiable
-			 * 417 Expectation Failed (Expect request header related)
-			 * 418 I'm a teapot (April's Fools 1998)
-			 * 419 Authentication Timeout (auth expired...)
-			 * 420 Method Failure (not official (used by Spring), deprecated)
-			 * 420 Enhance Your Calm (twitter specific, client being rate-limited)
-			 * 422 Unprocessable Entity (webDAV)
-			 * 423 Locked (webDAV)
-			 * 424 Failed Dependency (webDAV)
-			 * 426 Upgrade Required (client should switch to a different protocol)
-			 * 428 Precondition Required (origin server required the request to be conditional. Intended
-			 *     to prevent "the 'lost update' problem, where a client GETs a resource's state,
-			 *     modifies it and PUTs it back to the server when meanwhile a third party has
-			 *     modified the state on the server, leading to a conflict")
-			 * 429 Too Many Requests
-			 * 431 Request Header Fields Too Large
-			 */
+			switch (response.statusCode()) {
+                case 400:
+                    rval.responseType = ResponseType.INVALID_RESPONSE;
+                    break;
+                case 401:
+                case 403:
+                    rval.responseType = ResponseType.TOKEN_ERROR;
+                    break;
+                case 404:
+                    rval.responseType = ResponseType.SESSION_NOT_FOUND;
+                    break;
+                default:
+                    rval.responseType = ResponseType.INVALID_RESPONSE;
+            }
 		}
 		else if (response.statusCode() >= 500 && response.statusCode() < 600) {
 			// Server Error
-			// TODO set responsetype accordingly
-			/*
-			 * 500 Internal Server Error
-			 * 501 Not Implemented
-			 * 502 Bad Gateway (the server was acting as a gateway or proxy and received
-			 *     an invalid response from the upstream server).
-			 * 503 Service Unavailable
-			 * 504 Gateway Timeout
-			 * 505 Http Version Not Supported
-			 * 506 Variant Also Negotiates
-			 * 507 Insufficient Storage (webDAV)
-			 * 508 Loop Detected (webDAV)
-			 * 509 Bandwidth Limit Exceeded 
-			 * 510 Not extended
-			 * 511 Network Authentication Required
-			 */
+            rval.responseType = ResponseType.SERVER_ERROR;
 		}
 		else {
 			// Should never happen
