@@ -3,6 +3,7 @@ package es.us.dad.gameregistry.server.controller
 import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.server.domain.GameSession
 import es.us.dad.gameregistry.server.exception.MethodNotAllowedException
+import es.us.dad.gameregistry.server.exception.ObjectNotFoundException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.service.LoginServiceMock
 import es.us.dad.gameregistry.server.service.SessionService
