@@ -72,6 +72,9 @@ dependencies {
   // promises
   compile "com.darylteo.vertx:vertx-promises-groovy:1.2.1"
 
+  // A web server for static files
+  provided "io.vertx:mod-web-server:2.0.0-final"
+
   // If you're creating Scala compiled verticles you may need the following dependencies
   //provided "org.scala-lang:scala-library:$scalaVersion"
   //provided "io.vertx:lang-scala:$scalaLangModVersion@jar"
