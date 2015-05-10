@@ -236,7 +236,7 @@ public class GameRegistryClient {
 	 */
 	public GameRegistryClient getSessions(Object filterParams, Handler<GameRegistryResponse> responseHandler) {
 		// TODO filterParams needs the protocol to be defined to be more specific
-		String url = hostString() + "/sessions";
+		String url = "/sessions";
 		HttpClientRequest req = createHttpRequest(url, "GET", responseHandler);
 		// TODO Add filtering parameters
 		
@@ -338,10 +338,6 @@ public class GameRegistryClient {
 		req.end();
 		
 		return this;
-	}
-	
-	private String hostString() {
-		return this.host.getHostAddress() + ":" + this.port;
 	}
 	
 	private void addUserTokenToRequest(String user, String token, HttpClientRequest request) throws IllegalArgumentException {
