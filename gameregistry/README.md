@@ -32,7 +32,7 @@ Deployment
     docker run --name mongo-server mongo:3.0.1
     
     # Starts our module container exposing in the host the relevant ports and linking its network stack to mongo-server.
-    docker run -p 8080:8080 --link mongo-server:mongo-server distributedsystems/gameregistry
+    docker run -p 8080:8080 -p 8081:8081 --link mongo-server:mongo-server distributedsystems/gameregistry
     
     Caveats:
     The mongo image uses a docker volume to persist the database across runs. It might

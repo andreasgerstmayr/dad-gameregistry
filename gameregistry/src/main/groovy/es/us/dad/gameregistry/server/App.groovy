@@ -6,6 +6,21 @@ import org.vertx.java.core.Future
 
 class App extends Verticle {
 
+    def startStaticWebServer(Map<String, Object> serverConfig, Closure deployResult) {
+        def mod_webserver = "io.vertx~mod-web-server~2.0.0-final"
+
+        container.logger.info("Deploying module: ${mod_webserver}")
+
+        container.deployModule(mod_webserver, serverConfig, { asyncResult ->
+            if (asyncResult.failed) {
+                container.logger.error("Can't deploy static web server:")
+                container.logger.error(asyncResult.cause())
+            }
+
+            deployResult.call(asyncResult)
+        })
+    }
+
     def startMongoVerticle(Map<String, Object> mongoConfig, Closure deployResult) {
 		def mod_mongo = "io.vertx~mod-mongo-persistor~2.1.1"
 		
@@ -42,17 +57,25 @@ class App extends Verticle {
         Map<String, Object> appConfig = container.config
         Map<String, Object> mongoConfig = appConfig.getOrDefault("mongo-persistor", [:]) as Map<String, Object>
         Map<String, Object> gameRegistryConfig = appConfig.getOrDefault("game-registry", [:]) as Map<String, Object>
+        Map<String, Object> webServerConfig = appConfig.getOrDefault("static-server", [:]) as Map<String, Object>
 
-        startMongoVerticle(mongoConfig, { asyncResult ->
+        startStaticWebServer(webServerConfig, { asyncResult ->
             if (asyncResult.failed) {
                 startedResult.setFailure(asyncResult.result())
             }
             else {
-                startRestServer(gameRegistryConfig, { asyncResult2 ->
-                    if (asyncResult2.failed)
+                startMongoVerticle(mongoConfig, { asyncResult2 ->
+                    if (asyncResult2.failed) {
                         startedResult.setFailure(asyncResult2.result())
-                    else
-                        startedResult.setResult(null)
+                    }
+                    else {
+                        startRestServer(gameRegistryConfig, { asyncResult3 ->
+                            if (asyncResult3.failed)
+                                startedResult.setFailure(asyncResult3.result())
+                            else
+                                startedResult.setResult(null)
+                        })
+                    }
                 })
             }
         })
