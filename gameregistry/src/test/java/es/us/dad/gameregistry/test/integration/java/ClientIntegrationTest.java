@@ -1,26 +1,20 @@
 package es.us.dad.gameregistry.test.integration.java;
 
 import es.us.dad.gameregistry.client.GameRegistryClient;
-import es.us.dad.gameregistry.client.GameRegistryResponse;
 import es.us.dad.gameregistry.client.GameRegistryResponse.ResponseType;
 import es.us.dad.gameregistry.server.domain.GameSession;
-
 import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
-import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.testtools.TestVerticle;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.vertx.testtools.VertxAssert.*;
@@ -151,6 +145,18 @@ public class ClientIntegrationTest extends TestVerticle {
         });
     }
 
+    private void clearDatabase(Runnable callback) {
+        JsonObject mongoCmd = new JsonObject();
+        mongoCmd.putString("action", "drop_collection");
+        mongoCmd.putString("collection", "game_session");
+
+        vertx.eventBus().send("gameregistry.db", (Object)mongoCmd, message -> {
+            JsonObject messageBody = (JsonObject)message.body();
+            assertEquals("ok", messageBody.getString("status"));
+            callback.run();
+        });
+    }
+
     @Override
     public void start() {
         // Make sure we call initialize() - this sets up the assert stuff so assert functionality works correctly
@@ -176,8 +182,8 @@ public class ClientIntegrationTest extends TestVerticle {
                 }
                 assertTrue(asyncResult.succeeded());
                 assertNotNull("deploymentID should not be null", asyncResult.result());
-                // If deployed correctly then start the tests!
-                startTests();
+
+                clearDatabase(() -> startTests());
             }
         });
     }
