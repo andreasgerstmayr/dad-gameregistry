@@ -1,2 +1,6 @@
 general:
   build_dir: gameregistry
+
+machine:
+  java:
+    version: openjdk8
