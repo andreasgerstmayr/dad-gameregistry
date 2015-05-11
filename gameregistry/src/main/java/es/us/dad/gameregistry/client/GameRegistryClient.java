@@ -71,6 +71,7 @@ public class GameRegistryClient {
 	private HttpClient httpClient = null;
 	private InetAddress host = null;
 	private int port = -1;
+	private String basepath = "/api/v1";
 	private String user = "";
 	private String token = "";
 
@@ -236,7 +237,7 @@ public class GameRegistryClient {
 	 */
 	public GameRegistryClient getSessions(Object filterParams, Handler<GameRegistryResponse> responseHandler) {
 		// TODO filterParams needs the protocol to be defined to be more specific
-		String url = "/sessions";
+		String url = basepath + "/sessions";
 		HttpClientRequest req = createHttpRequest(url, "GET", responseHandler);
 		// TODO Add filtering parameters
 		
@@ -277,7 +278,7 @@ public class GameRegistryClient {
 	 * @return This client (fluent interface).
 	 */
 	public GameRegistryClient addSession(GameSession session, Handler<GameRegistryResponse> responseHandler) {
-		String url = "/sessions";
+		String url = basepath + "/sessions";
 		HttpClientRequest req = createHttpRequest(url, "POST", responseHandler);
 		req.headers().set("Content-Type", "application/json");
 
@@ -298,7 +299,7 @@ public class GameRegistryClient {
 	 * @return This client.
 	 */
 	public GameRegistryClient getSession(UUID sessionId, Handler<GameRegistryResponse> responseHandler) {
-		String url = "/sessions/" + sessionId.toString();
+		String url = basepath + "/sessions/" + sessionId.toString();
 		HttpClientRequest req = createHttpRequest(url, "GET", responseHandler);
 		req.end();
 		
@@ -317,7 +318,7 @@ public class GameRegistryClient {
 	 * @return This client.
 	 */
 	public GameRegistryClient updateSession(GameSession session, Handler<GameRegistryResponse> responseHandler) {
-		String url = "/sessions/" + session.getId();
+		String url = basepath + "/sessions/" + session.getId();
 		HttpClientRequest req = createHttpRequest(url, "PUT", responseHandler);
 		req.headers().set("Content-Type", "application/json");
 		req.end(new JsonObject(session.toJsonMap()).toString());
@@ -333,7 +334,7 @@ public class GameRegistryClient {
 	 * @return This client.
 	 */
 	public GameRegistryClient deleteSession(UUID sessionId, Handler<GameRegistryResponse> responseHandler) {
-		String url = "/sessions/" + sessionId;
+		String url = basepath + "/sessions/" + sessionId;
 		HttpClientRequest req = createHttpRequest(url, "DELETE", responseHandler);
 		req.end();
 		

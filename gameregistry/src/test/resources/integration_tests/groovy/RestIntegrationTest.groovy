@@ -18,7 +18,7 @@ def jsonOrNull(Buffer content) {
 }
 
 def createSession(HttpClient client, Closure handler) {
-    client.post("/sessions", { HttpClientResponse resp ->
+    client.post("/api/v1/sessions", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
@@ -26,7 +26,7 @@ def createSession(HttpClient client, Closure handler) {
 }
 
 def retrieveSession(HttpClient client, String id, Closure handler) {
-    client.get("/sessions/${id}", { HttpClientResponse resp ->
+    client.get("/api/v1/sessions/${id}", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
@@ -34,7 +34,7 @@ def retrieveSession(HttpClient client, String id, Closure handler) {
 }
 
 def updateSession(HttpClient client, String id, Closure handler) {
-    client.put("/sessions/${id}", { HttpClientResponse resp ->
+    client.put("/api/v1/sessions/${id}", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
@@ -42,7 +42,7 @@ def updateSession(HttpClient client, String id, Closure handler) {
 }
 
 def deleteSession(HttpClient client, String id, Closure handler) {
-    client.delete("/sessions/${id}", { HttpClientResponse resp ->
+    client.delete("/api/v1/sessions/${id}", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
@@ -50,7 +50,7 @@ def deleteSession(HttpClient client, String id, Closure handler) {
 }
 
 def findSessions(HttpClient client, String user, Closure handler) {
-    client.get("/sessions?user="+user, { HttpClientResponse resp ->
+    client.get("/api/v1/sessions?user="+user, { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
@@ -122,7 +122,7 @@ def testFindSessions() {
 
 def testNotAuthenticated() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
-    client.post("/sessions", { HttpClientResponse resp ->
+    client.post("/api/v1/sessions", { HttpClientResponse resp ->
         resp.bodyHandler { Buffer content ->
             assertEquals(403, resp.statusCode)
             assertEquals("""{"error":"Invalid user or token"}""", content.toString())
