@@ -20,7 +20,7 @@ class SessionsController extends Controller {
         this.sessionService = sessionService
     }
 
-    @GET("/sessions")
+    @GET("/api/v1/sessions")
     public void getSessions(HttpServerRequest request) {
         String user = request.params.get("user")
 
@@ -32,7 +32,7 @@ class SessionsController extends Controller {
     }
 
     @Authenticated
-    @POST("/sessions")
+    @POST("/api/v1/sessions")
     public void createSession(HttpServerRequest request) {
         String user = request.headers.get(GameRegistryConstants.GAMEREGISTRY_USER_HEADER)
         request.bodyHandler { Buffer buffer ->
@@ -47,12 +47,12 @@ class SessionsController extends Controller {
         }
     }
 
-    @PUT("/sessions")
+    @PUT("/api/v1/sessions")
     public void changeSessions(HttpServerRequest request) {
         sendErrorResponse(request, new MethodNotAllowedException())
     }
 
-    @DELETE("/sessions")
+    @DELETE("/api/v1/sessions")
     public void deleteSessions(HttpServerRequest request) {
         sendErrorResponse(request, new MethodNotAllowedException())
     }

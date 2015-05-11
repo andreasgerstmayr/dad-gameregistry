@@ -25,7 +25,7 @@ class SessionController extends Controller {
     }
 
     @Authenticated
-    @GET("/sessions/:id")
+    @GET("/api/v1/sessions/:id")
     public void getSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
 
@@ -37,13 +37,13 @@ class SessionController extends Controller {
     }
 
     @Authenticated
-    @POST("/sessions/:id")
+    @POST("/api/v1/sessions/:id")
     public void postSession(HttpServerRequest request) {
         sendErrorResponse(request, new MethodNotAllowedException())
     }
 
     @Authenticated
-    @PUT("/sessions/:id")
+    @PUT("/api/v1/sessions/:id")
     public void changeSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
 
@@ -55,7 +55,7 @@ class SessionController extends Controller {
     }
 
     @Authenticated
-    @DELETE("/sessions/:id")
+    @DELETE("/api/v1/sessions/:id")
     public void deleteSession(HttpServerRequest request) {
         UUID id = UUID.fromString(request.params.get("id"))
 
