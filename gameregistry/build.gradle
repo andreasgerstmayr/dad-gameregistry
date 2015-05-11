@@ -1,3 +1,6 @@
+plugins {
+  id "com.moowork.node" version "0.9"
+}
 apply from: "gradle/vertx.gradle"
 
 /*
@@ -156,4 +159,19 @@ def configurePom(def pom) {
       setProperty('project.build.sourceEncoding', 'UTF8')
     }
   }
+}
+
+// documentation
+task installBootprint(type: NpmTask) {
+  args = ['install', 'bootprint-swagger']
+}
+
+task apidocHtml(type: NodeTask, dependsOn: installBootprint) {
+  script = file("node_modules/bootprint/bootprint-cli.js")
+  args = ['swagger', 'doc/swagger.json', "build/docs/apidoc/html"]
+}
+
+task apidocPdf(type: Exec, dependsOn: apidocHtml) {
+  commandLine 'phantomjs'
+  args = ['doc/html-to-pdf.js', 'build/docs/apidoc/html/index.html', 'build/docs/apidoc/pdf/apidoc.pdf', 'A4']
 }
