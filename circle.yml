@@ -1,7 +1,9 @@
 general:
   build_dir: gameregistry
   artifacts:
-    - "build"
+    - "build/reports"
+    - "build/libs"
+    - "build/docs"
 
 machine:
   java:
