@@ -1,6 +1,13 @@
 general:
   build_dir: gameregistry
+  artifacts:
+    - "build"
 
 machine:
   java:
     version: oraclejdk8
+
+test:
+  post:
+    - ./gradlew modZip
+    - ./gradlew apidocPdf
