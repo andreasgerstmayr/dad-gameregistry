@@ -2,9 +2,6 @@ package es.us.dad.gameregistry.server.service
 
 import com.darylteo.vertx.promises.groovy.Promise
 import org.vertx.groovy.core.Vertx
-import org.vertx.java.core.file.FileProps
-import org.vertx.java.core.logging.Logger
-import java.io.File
 
 class StaticFilesService {
     private final String web_root

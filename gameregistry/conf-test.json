@@ -10,11 +10,5 @@
   "game-registry" : {
     "host" : "localhost",
     "port" : 8080
-  },
-
-  "static-server" : {
-    "host" : "localhost",
-    "port" : 8081,
-    "web_root" : "web"
   }
 }

@@ -1,6 +1,5 @@
 package es.us.dad.gameregistry.server.controller
 
-import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.server.service.StaticFilesService
 import org.vertx.groovy.core.http.HttpServerRequest
 import org.vertx.groovy.core.http.RouteMatcher
@@ -8,25 +7,22 @@ import org.vertx.java.core.logging.Logger
 
 class StaticFilesController {
     final private StaticFilesService fileService
-    final private String base_path = "/api/v1/api-docs"
+    final private String base_path
     final private Logger logger
 
     public StaticFilesController(String base_path, StaticFilesService fileService, Logger logger) {
         this.fileService = fileService
-        this.base_path = base_path
         this.logger = logger
 
-        if (this.base_path[this.base_path.length()-1] == '/')
-            this.base_path = this.base_path.substring(this.base_path.length()-2)
-    }
-
-    public StaticFilesController(StaticFilesService fileService) {
-        this.fileService = fileService
+        if (base_path[base_path.length()-1] == '/')
+            this.base_path = base_path.substring(base_path.length()-2)
+        else
+            this.base_path = base_path
     }
 
     public void registerUrls(RouteMatcher routeMatcher) {
-        String regexp = base_path.replaceAll("\\/", "\\\\\\/") + "\\/(.*)"
-        //String regexp = "\\/api\\/v1\\/api-doc\\/(.*)"
+        String regexp = "^" + base_path.replaceAll("\\/", "\\\\\\/") + "\\/(.*)"
+        //String regexp = "\\/doc\\/(.*)"
         logger.info("Static file server bound to ${regexp}")
         routeMatcher.allWithRegEx(regexp, { HttpServerRequest request ->
             logger.info("Received static file request: " + request.path)
@@ -38,10 +34,6 @@ class StaticFilesController {
                 request.response.setStatusCode(404)
                                 .end()
             })
-        })
-
-        routeMatcher.get("/api/v2/api-docs/index.html", { HttpServerRequest request ->
-            request.response.sendFile("web/index.html")
         })
     }
 }

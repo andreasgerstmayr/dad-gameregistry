@@ -1,6 +1,5 @@
 package integration_tests.groovy
 
-import es.us.dad.gameregistry.server.RestServer
 import org.vertx.groovy.core.buffer.Buffer
 import org.vertx.groovy.core.eventbus.Message
 import org.vertx.groovy.core.http.HttpClient

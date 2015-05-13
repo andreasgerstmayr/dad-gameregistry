@@ -32,7 +32,7 @@ class RestServer extends Verticle {
         // create instances of all controllers and register the URLs to the RouteMatcher
         new SessionsController(loginService, sessionService).registerUrls(rm)
         new SessionController(loginService, sessionService).registerUrls(rm)
-        new StaticFilesController("/api/v1/api-docs", fileService, container.logger).registerUrls(rm)
+        new StaticFilesController("/doc", fileService, container.logger).registerUrls(rm)
 
         vertx.createHttpServer().requestHandler(rm.asClosure()).listen(port, host)
         container.logger.info("GameRegistry REST Server ready, listening on ${host}:${port}.")
