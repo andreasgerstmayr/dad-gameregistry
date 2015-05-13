@@ -1,192 +1,278 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "title": "GameRegistry API",
-        "description": "Nuestro sistema de información tiene que implementar un API Rest a la colección de sesiones de juego.",
-        "version": "1.0.0"
-    },
-    "host": "gameregistry.cloudapp.com",
-    "schemes": [
-        "https"
-    ],
-    "basePath": "/v1",
-    "produces": [
-        "application/json"
-    ],
-    "paths": {
-        "/sessions": {
-            "get": {
-                "summary": "Representa una colección de sesiones de juego.",
-                "description": "Devuelve una colección de sesiones de juego. Debe aceptar parámetros de filtrado. Esto está aún por definir y dependerá un poco de las necesidades de los subsistemas que necesiten leer colecciones de sesiones de juegos y de sus necesidades de filtrado.\n",
-                "parameters": [
-                    {
-                        "name": "user",
-                        "in": "query",
-                        "required": true,
-                        "type": "string",
-                        "format": "string"
-                    }
-                ],
-                "tags": [
-                    "GameSession"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "una colección de sesiones de juego",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/GameSession"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Añade una sesión a la colección de sesiones de juego.",
-                "responses": {
-                    "201": {
-                        "description": "la sesión de juego",
-                        "schema": {
-                            "$ref": "#/definitions/GameSession"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "responses": {
-                    "405": {
-                        "description": "Method not allowed"
-                    }
-                }
-            },
-            "delete": {
-                "responses": {
-                    "405": {
-                        "description": "Method not allowed"
-                    }
-                }
+  "swagger": "2.0",
+  "info": {
+    "title": "GameRegistry API",
+    "description": "us.es ETSII Computer Engineering, Distributed Systems course, a simple information system that stores game sessions.",
+    "version": "1.0.0"
+  },
+  "host": "gameregistry.cloudapp.com",
+  "schemes": [
+    "http"
+  ],
+  "basePath": "/api/v1",
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/sessions": {
+      "get": {
+        "summary": "Returns a collection of game sessions.",
+        "description": "This resource represents the collection of game sessions. It accepts query arguments for filtering (not implemented or defined as of yet, waiting for the games groups to 'express' their needs).",
+        "parameters": [
+          {
+            "name": "gameregistry-user",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The used identifier used in the Login Server."
+          },
+          {
+            "name": "gameregistry-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The token related to the user specified in 'gameregistry-user'."
+          },
+          {
+            "name": "user",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "string",
+            "description": "Example filter parameter. TODO."
+          }
+        ],
+        "tags": [
+          "GameSession"
+        ],
+        "responses": {
+          "200": {
+            "description": "A collection of game sessions.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GameSession"
+              }
             }
-        },
-        "/sessions/{id}": {
-            "get": {
-                "summary": "Devuelve la sesión de juego completa.",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "el identificador de una sesión de juego",
-                        "required": true,
-                        "type": "number",
-                        "format": "uuid"
-                    }
-                ],
-                "tags": [
-                    "GameSession"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "la sesión de juego",
-                        "schema": {
-                            "$ref": "#/definitions/GameSession"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "el identificador de una sesión de juego",
-                        "required": true,
-                        "type": "number",
-                        "format": "uuid"
-                    }
-                ],
-                "responses": {
-                    "405": {
-                        "description": "Method not allowed"
-                    }
-                }
-            },
-            "put": {
-                "summary": "Reemplaza la sesión de juego indicada con la proporcionada por la petición.",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "el identificador de una sesión de juego",
-                        "required": true,
-                        "type": "number",
-                        "format": "uuid"
-                    }
-                ],
-                "tags": [
-                    "GameSession"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "la sesión de juego",
-                        "schema": {
-                            "$ref": "#/definitions/GameSession"
-                        }
-                    },
-                    "404": {
-                        "description": "Si la sesión no existe"
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Borra la sesión de juego indicada",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "el identificador de una sesión de juego",
-                        "required": true,
-                        "type": "number",
-                        "format": "uuid"
-                    }
-                ],
-                "tags": [
-                    "GameSession"
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No content"
-                    },
-                    "404": {
-                        "description": "Si la sesión no existe"
-                    }
-                }
-            }
+          }
         }
-    },
-    "definitions": {
-        "GameSession": {
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "el identificador de una sesión de juego"
-                },
-                "user": {
-                    "type": "string",
-                    "description": "el usuario"
-                },
-                "game": {
-                    "type": "string",
-                    "description": "el nombre de juego"
-                },
-                "start": {
-                    "type": "string",
-                    "description": "El inicio de juego"
-                },
-                "end": {
-                    "type": "string",
-                    "description": "El término de juego"
-                }
+      },
+      "post": {
+        "summary": "Adds a new session to the game session collection.",
+        "parameters": [
+          {
+            "name": "gameregistry-user",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The used identifier used in the Login Server."
+          },
+          {
+            "name": "gameregistry-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The token related to the user specified in 'gameregistry-user'."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The game session was successfully added to the server.",
+            "schema": {
+              "$ref": "#/definitions/GameSession"
             }
+          }
         }
+      },
+      "put": {
+        "responses": {
+          "405": {
+            "description": "Method not allowed"
+          }
+        }
+      },
+      "delete": {
+        "responses": {
+          "405": {
+            "description": "Method not allowed"
+          }
+        }
+      }
+    },
+    "/sessions/{id}": {
+      "get": {
+        "summary": "Returns a game session given an id.",
+        "parameters": [
+          {
+            "name": "gameregistry-user",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The used identifier used in the Login Server."
+          },
+          {
+            "name": "gameregistry-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The token related to the user specified in 'gameregistry-user'."
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The game session identifier.",
+            "required": true,
+            "type": "number",
+            "format": "uuid"
+          }
+        ],
+        "tags": [
+          "GameSession"
+        ],
+        "responses": {
+          "200": {
+            "description": "The game session is returned.",
+            "schema": {
+              "$ref": "#/definitions/GameSession"
+            }
+          }
+        }
+      },
+      "post": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The game session identifier.",
+            "required": true,
+            "type": "number",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Method not allowed"
+          }
+        }
+      },
+      "put": {
+        "summary": "Replaces the game session identified by 'id' with the included game session.",
+        "parameters": [
+          {
+            "name": "gameregistry-user",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The used identifier used in the Login Server."
+          },
+          {
+            "name": "gameregistry-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The token related to the user specified in 'gameregistry-user'."
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The game session identifier.",
+            "required": true,
+            "type": "number",
+            "format": "uuid"
+          }
+        ],
+        "tags": [
+          "GameSession"
+        ],
+        "responses": {
+          "200": {
+            "description": "The game session was replaced.",
+            "schema": {
+              "$ref": "#/definitions/GameSession"
+            }
+          },
+          "404": {
+            "description": "If the game session was not found."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Removes a game session from the server.",
+        "parameters": [
+          {
+            "name": "gameregistry-user",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The used identifier used in the Login Server."
+          },
+          {
+            "name": "gameregistry-token",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "format": "string",
+            "description": "The token related to the user specified in 'gameregistry-user'."
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The game session identifier.",
+            "required": true,
+            "type": "number",
+            "format": "uuid"
+          }
+        ],
+        "tags": [
+          "GameSession"
+        ],
+        "responses": {
+          "204": {
+            "description": "The game session was removed."
+          },
+          "404": {
+            "description": "No game session with the given 'id' has been found."
+          }
+        }
+      }
     }
+  },
+  "definitions": {
+    "GameSession": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "el identificador de una sesión de juego"
+        },
+        "user": {
+          "type": "string",
+          "description": "el usuario"
+        },
+        "game": {
+          "type": "string",
+          "description": "el nombre de juego"
+        },
+        "start": {
+          "type": "string",
+          "description": "El inicio de juego"
+        },
+        "end": {
+          "type": "string",
+          "description": "El término de juego"
+        }
+      }
+    }
+  }
 }
