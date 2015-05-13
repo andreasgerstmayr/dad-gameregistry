@@ -3,18 +3,16 @@ package integration_tests.groovy
 import org.vertx.groovy.core.http.HttpClient
 import org.vertx.groovy.core.http.HttpClientResponse
 import org.vertx.groovy.testtools.VertxTests
-import org.vertx.java.core.eventbus.Message
 import org.vertx.java.core.json.JsonObject
 
 import static org.vertx.testtools.VertxAssert.*
 
-
 def testIndexHtml() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
-    String path = "/api/v1/api-docs/index.html"
+    String path = "/doc/index.html"
 
     container.logger.info("Performing GET to ${path}")
-    client.get(path, { response ->
+    client.getNow(path, { response ->
         container.logger.info("Received response: ${response.statusCode}")
         assertEquals(200, response.statusCode)
         testComplete()
@@ -23,7 +21,7 @@ def testIndexHtml() {
 
 def testNoIndexHtml() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
-    client.get("/api/v1/api-docs/", { HttpClientResponse response ->
+    client.getNow("/doc/", { HttpClientResponse response ->
         assertEquals(200, response.statusCode)
         testComplete()
     })
@@ -31,7 +29,7 @@ def testNoIndexHtml() {
 
 def testFileNotFound() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
-    client.get("/api/v1/api-docs/bjerg", { HttpClientResponse response ->
+    client.getNow("/doc/bjerg", { HttpClientResponse response ->
         assertEquals(404, response.statusCode)
         testComplete()
     })
@@ -39,7 +37,7 @@ def testFileNotFound() {
 
 def testSubDirectory() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
-    client.get("/api/v1/api-docs/css/screen.css", { HttpClientResponse response ->
+    client.getNow("/doc/css/screen.css", { HttpClientResponse response ->
         assertEquals(200, response.statusCode)
         testComplete()
     })
