@@ -5,7 +5,6 @@
     "description": "us.es ETSII Computer Engineering, Distributed Systems course, a simple information system that stores game sessions.",
     "version": "1.0.0"
   },
-  "host": "gameregistry.cloudapp.com",
   "schemes": [
     "http"
   ],
