@@ -23,9 +23,8 @@ class StaticFilesController {
     public void registerUrls(RouteMatcher routeMatcher) {
         String regexp = "^" + base_path.replaceAll("\\/", "\\\\\\/") + "\\/(.*)"
         //String regexp = "\\/doc\\/(.*)"
-        logger.info("Static file server bound to ${regexp}")
+        logger.info("Static file server bounding registered: ${base_path} -> ${regexp}")
         routeMatcher.allWithRegEx(regexp, { HttpServerRequest request ->
-            logger.info("Received static file request: " + request.path)
             String withoutBasePath = request.path.substring(base_path.length())
 
             fileService.getSystemPathOf(withoutBasePath).then({ String system_path ->
