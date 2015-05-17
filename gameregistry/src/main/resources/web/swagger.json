@@ -251,23 +251,23 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "el identificador de una sesión de juego"
+          "description": "an UUID that uniquely identifies the game session."
         },
         "user": {
           "type": "string",
-          "description": "el usuario"
+          "description": "User identifier."
         },
         "game": {
           "type": "string",
-          "description": "el nombre de juego"
+          "description": "Game name or identifier."
         },
         "start": {
           "type": "string",
-          "description": "El inicio de juego"
+          "description": "Start date of the game session."
         },
         "end": {
           "type": "string",
-          "description": "El término de juego"
+          "description": "End date of the game session."
         }
       }
     }
