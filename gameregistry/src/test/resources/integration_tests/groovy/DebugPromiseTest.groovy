@@ -9,8 +9,8 @@ import static org.vertx.testtools.VertxAssert.*
 
 def testDebugPromiseIsNotBlocking() {
     HttpClient client = vertx.createHttpClient().setPort(8080)
+    HttpClient client2 = vertx.createHttpClient().setPort(8080)
     String path = "/debug_promise"
-    //final Map<String, Boolean> myMap = new HashMap<>().put("secondRequestEnded", false)
 
     /*
      * In this test we want to perform a request to our debug_promise url,
@@ -35,25 +35,30 @@ def testDebugPromiseIsNotBlocking() {
     there is something fishy going on and would be cool to know what.
      */
 
-    fail("TODO")
-    return
+    List<Integer> order = []
 
     // This gets the first request going
-    container.logger.info("Launching first request!")
+    container.logger.info("#1: Launching first request!")
+    order.add(1)
+
     client.getNow(path, { response ->
-        container.logger.info("First request answered.")
         // This code will execute around 20 secs after the getNow call was performed
-        //assertTrue(myMap.get("secondRequestEnded"))
+        container.logger.info("#4: First request answered.")
+        order.add(4)
+
+        assertEquals([1,2,3,4], order)
         testComplete()
     })
 
     // Wait for 2 seconds
     vertx.setTimer(2 * 1000, {long time ->
         // And then do another request that should end before the first one.
-        container.logger.info("Launching second request!")
-        client.getNow("/doc", { response ->
-            container.logger.info("Second request answered.")
-            //myMap.put("secondRequestEnded", true)
+        container.logger.info("#2: Launching second request!")
+        order.add(2)
+
+        client2.getNow("/doc", { response ->
+            container.logger.info("#3: Second request answered.")
+            order.add(3)
         })
     })
 }
