@@ -19,8 +19,8 @@ class DebugPromiseService {
         this.vertx = vertx
     }
 
-    Promise<String> doSomething(HttpServerRequest request) {
-        final Promise<HttpServerResponse> p = new Promise()
+    Promise<String> doSomething() {
+        final Promise<String> p = new Promise()
 
         vertx.setTimer(wait_time * 1000, { time ->
             p.fulfill("<html><body>Waited " + wait_time + "seconds to give this answer.</body></html>")
