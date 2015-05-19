@@ -105,7 +105,7 @@ public class GameRegistryClient {
      * @throws UnknownHostException
      * @throws URISyntaxException
      */
-    static void createFromAddress(String address, Vertx vertx, Handler<AsyncResult<GameRegistryClient>> resultHandler) throws UnknownHostException, URISyntaxException {
+    public static void createFromAddress(String address, Vertx vertx, Handler<AsyncResult<GameRegistryClient>> resultHandler) {
         int port;
         int colonsIndex = address.indexOf(':');
 
@@ -121,16 +121,20 @@ public class GameRegistryClient {
             }
         }
 
-        DnsClient dnsClient = vertx.createDnsClient(new InetSocketAddress("10.0.0.1", 53));
+        DnsClient dnsClient = vertx.createDnsClient(new InetSocketAddress("8.8.8.8", 53), new InetSocketAddress("8.8.4.4", 53));
         dnsClient.lookup(address, new Handler<AsyncResult<InetAddress>>() {
             @Override
             public void handle(AsyncResult<InetAddress> lookUpResult) {
-                if (lookUpResult.succeeded()) {
+                // If host can not be resolved the result will be (succeed, null).
+                if (lookUpResult.succeeded() && lookUpResult.result() != null) {
                     // Succeed our async result with a new GameRegistryClienet
                     resultHandler.handle(new AsyncResultImpl<>(new GameRegistryClient(lookUpResult.result(), port, vertx)));
                 } else {
                     // Fail
-                    resultHandler.handle(new AsyncResultImpl<>(lookUpResult.cause()));
+                    if (lookUpResult.succeeded())
+                        resultHandler.handle(new AsyncResultImpl<>(new UnknownHostException("Couldn't resolve address: " + address)));
+                    else
+                        resultHandler.handle(new AsyncResultImpl<>(lookUpResult.cause()));
                 }
             }
         });
@@ -189,6 +193,38 @@ public class GameRegistryClient {
 		this.token = token;
 		return this;
 	}
+
+	/**
+	 * Sets the base path to use to make requests to the server.
+	 *
+	 * The base path is the route inside the path where the API lives.
+	 * For example, if the GameRegistry responds to requests to the path
+	 * "/api/v1" (ie "/api/v1/sessions/" to request a collection of sessions)
+	 * the base path would be "/api/v1".
+	 * @param basePath
+	 * @return
+	 */
+	public GameRegistryClient setBasePath(String basePath) {
+		if (basePath.charAt(basePath.length()-1) =='/')
+			this.basepath = basepath.substring(0, basePath.length()-2);
+		this.basepath = basePath;
+
+		return this;
+	}
+
+	public String getUser() {
+		return this.user;
+	}
+
+	public String getToken() {
+		return this.token;
+	}
+
+	public String getBasePath() {
+		return this.basepath;
+	}
+
+    public int getPort() { return this.port; }
 	
 	/* 
 	 * Next should be methods to perform requests on the server. Needs more work, like

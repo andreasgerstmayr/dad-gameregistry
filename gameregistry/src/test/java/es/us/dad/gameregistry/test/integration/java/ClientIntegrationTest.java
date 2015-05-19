@@ -1,16 +1,19 @@
 package es.us.dad.gameregistry.test.integration.java;
 
 import es.us.dad.gameregistry.client.GameRegistryClient;
+import es.us.dad.gameregistry.client.GameRegistryResponse;
 import es.us.dad.gameregistry.client.GameRegistryResponse.ResponseType;
 import es.us.dad.gameregistry.server.domain.GameSession;
 import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.core.json.JsonObject;
+import org.vertx.java.core.Handler;
 import org.vertx.testtools.TestVerticle;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -30,6 +33,69 @@ import static org.vertx.testtools.VertxAssert.*;
 public class ClientIntegrationTest extends TestVerticle {
 
     // TODO Test createFromAddress
+    @Test
+    public void testCreateFromAddressWithPort() {
+        GameRegistryClient.createFromAddress("gameregistry.cloudapp.net:8080", vertx, event -> {
+            if (event.succeeded()) {
+                GameRegistryClient client = event.result();
+                assertEquals(client.getBasePath(), "/api/v1");
+                assertEquals(8080, client.getPort());
+
+                testComplete();
+            }
+            else {
+                fail("Failed to resolve DNS name: " + event.cause().toString());
+            }
+        });
+    }
+
+    @Test
+    public void testCreateFromAddressWithoutPort() {
+        GameRegistryClient.createFromAddress("gameregistry.cloudapp.net", vertx, event -> {
+            if (event.succeeded()) {
+                GameRegistryClient client = event.result();
+                assertEquals(8080, client.getPort());
+
+                testComplete();
+            }
+            else {
+                fail("Failed to resolve DNS name: " + event.cause().toString());
+            }
+        });
+    }
+
+    @Test
+    public void testCreateFromWrongAddress() {
+        GameRegistryClient.createFromAddress("something.that.dont.exists.wrong", vertx, event -> {
+            if (event.succeeded()) {
+                fail("Somehow 'something.that.dont.exists.wrong' was resolved?");
+            }
+            else {
+                assertTrue(event.cause() instanceof UnknownHostException);
+                testComplete();
+            }
+        });
+    }
+
+    @Test
+    public void testBasicProperties() {
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLoopbackAddress(), vertx)
+                .setUser("myUser")
+                .setToken("myToken")
+                .setBasePath("/v1");
+
+        assertEquals(8080, client.getPort());
+        assertEquals("myUser", client.getUser());
+        assertEquals("myToken", client.getToken());
+        assertEquals("/v1", client.getBasePath());
+
+        client.setBasePath("/v1/");
+        assertEquals("/v1", client.getBasePath());
+
+        testComplete();
+    }
+
+    // TODO setToken, setUser, setBasePath
 
     @Test
     public void testClientCreateSession() throws UnknownHostException {
