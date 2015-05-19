@@ -32,7 +32,6 @@ import static org.vertx.testtools.VertxAssert.*;
  */
 public class ClientIntegrationTest extends TestVerticle {
 
-    // TODO Test createFromAddress
     @Test
     public void testCreateFromAddressWithPort() {
         GameRegistryClient.createFromAddress("gameregistry.cloudapp.net:8080", vertx, event -> {
@@ -66,9 +65,10 @@ public class ClientIntegrationTest extends TestVerticle {
 
     @Test
     public void testCreateFromWrongAddress() {
-        GameRegistryClient.createFromAddress("something.that.dont.exists.wrong", vertx, event -> {
+        String missingHost = "something.that.doesnt.exists.cloudapp.net";
+        GameRegistryClient.createFromAddress(missingHost, vertx, event -> {
             if (event.succeeded()) {
-                fail("Somehow 'something.that.dont.exists.wrong' was resolved?");
+                fail("Somehow '" + missingHost + "' was resolved?");
             }
             else {
                 assertTrue(event.cause() instanceof UnknownHostException);
@@ -94,8 +94,6 @@ public class ClientIntegrationTest extends TestVerticle {
 
         testComplete();
     }
-
-    // TODO setToken, setUser, setBasePath
 
     @Test
     public void testClientCreateSession() throws UnknownHostException {

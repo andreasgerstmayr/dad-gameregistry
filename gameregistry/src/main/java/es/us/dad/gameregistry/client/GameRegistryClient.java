@@ -7,6 +7,8 @@ import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.dns.DnsClient;
+import org.vertx.java.core.dns.DnsException;
+import org.vertx.java.core.dns.DnsResponseCode;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.http.HttpClientResponse;
@@ -108,12 +110,16 @@ public class GameRegistryClient {
     public static void createFromAddress(String address, Vertx vertx, Handler<AsyncResult<GameRegistryClient>> resultHandler) {
         int port;
         int colonsIndex = address.indexOf(':');
+        String hostname = address;
 
-        if (colonsIndex == -1)
+        if (colonsIndex == -1) {
             port = DEFAULT_PORT;
+            hostname = address;
+        }
         else {
             try {
                 port = Integer.parseInt(address.substring(colonsIndex + 1));
+				hostname = address.substring(0, colonsIndex);
             } catch (Exception e) {
                 // Fail the async result becouse port is not a number
                 resultHandler.handle(new AsyncResultImpl<>(e));
@@ -122,19 +128,29 @@ public class GameRegistryClient {
         }
 
         DnsClient dnsClient = vertx.createDnsClient(new InetSocketAddress("8.8.8.8", 53), new InetSocketAddress("8.8.4.4", 53));
-        dnsClient.lookup(address, new Handler<AsyncResult<InetAddress>>() {
+        dnsClient.lookup(hostname, new Handler<AsyncResult<InetAddress>>() {
             @Override
             public void handle(AsyncResult<InetAddress> lookUpResult) {
-                // If host can not be resolved the result will be (succeed, null).
+                // DnsClient documentation states that when a host can't be resolved the AsyncResult will be succeeded
+                // and the result() call will be null.
+                // But what actually seems to happen is that the AsyncResult is failed and the cause is a DnsException
+                // with code 3 (NXDOMAIN)
                 if (lookUpResult.succeeded() && lookUpResult.result() != null) {
                     // Succeed our async result with a new GameRegistryClienet
                     resultHandler.handle(new AsyncResultImpl<>(new GameRegistryClient(lookUpResult.result(), port, vertx)));
                 } else {
-                    // Fail
+                    // Either is succeeded but null or failed
                     if (lookUpResult.succeeded())
-                        resultHandler.handle(new AsyncResultImpl<>(new UnknownHostException("Couldn't resolve address: " + address)));
-                    else
-                        resultHandler.handle(new AsyncResultImpl<>(lookUpResult.cause()));
+                        resultHandler.handle(new AsyncResultImpl<>(new UnknownHostException("Couldn't resolve address (result is null): " + address)));
+                    else {
+                        // It failed. Is it an NXDOMAIN error?
+                        if (lookUpResult.cause() instanceof DnsException && ((DnsException) lookUpResult.cause()).code() == DnsResponseCode.NXDOMAIN) {
+                            resultHandler.handle(new AsyncResultImpl<>(new UnknownHostException("Couldn't resolve address (NXDOMAIN error):" + address)));
+                        }
+                        // If it isnt just fail with whatever the cause of the async result was.
+                        else
+                            resultHandler.handle(new AsyncResultImpl<>(lookUpResult.cause()));
+                    }
                 }
             }
         });
@@ -206,8 +222,9 @@ public class GameRegistryClient {
 	 */
 	public GameRegistryClient setBasePath(String basePath) {
 		if (basePath.charAt(basePath.length()-1) =='/')
-			this.basepath = basepath.substring(0, basePath.length()-2);
-		this.basepath = basePath;
+			this.basepath = basepath.substring(0, basePath.length()-1);
+        else
+		    this.basepath = basePath;
 
 		return this;
 	}
