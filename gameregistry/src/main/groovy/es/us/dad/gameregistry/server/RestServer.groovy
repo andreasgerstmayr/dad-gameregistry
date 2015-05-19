@@ -5,6 +5,7 @@ import es.us.dad.gameregistry.server.controller.SessionsController
 import es.us.dad.gameregistry.server.controller.StaticFilesController
 import es.us.dad.gameregistry.server.repository.ISessionRepository
 import es.us.dad.gameregistry.server.repository.MongoSessionRepository
+import es.us.dad.gameregistry.server.service.DebugPromiseService
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.service.LoginServiceMock
 import es.us.dad.gameregistry.server.service.SessionService
@@ -16,11 +17,14 @@ class RestServer extends Verticle {
 
     private final String DEFAULT_HOST = "localhost"
     private final int DEFAULT_PORT = 8080
+    private final String DEFAULT_SWAGGER_WEB = "/doc";
 
     def start() {
         def config = container.config
         String host = config.getOrDefault("host", DEFAULT_HOST) as String
         int port = config.getOrDefault("port", DEFAULT_PORT) as int
+        String swagger_ui_basepath = config.getOrDefault("swagger_ui_basepath", DEFAULT_SWAGGER_WEB)
+        Boolean debug_promise = config.getOrDefault("debug_promise", false)
 
         RouteMatcher rm = new RouteMatcher()
 
@@ -32,7 +36,15 @@ class RestServer extends Verticle {
         // create instances of all controllers and register the URLs to the RouteMatcher
         new SessionsController(loginService, sessionService).registerUrls(rm)
         new SessionController(loginService, sessionService).registerUrls(rm)
-        new StaticFilesController("/doc", fileService, container.logger).registerUrls(rm)
+        new StaticFilesController(swagger_ui_basepath, fileService, container.logger).registerUrls(rm)
+
+        // This was asked by Pablo (the boss). He wants to see a test where a promise
+        // is fullfilled after an artificial an exagerated wait time (around 20 secs)
+        // and see if the server is able to answer requests while waiting. He wants to
+        // ensure Promise is not blocking, basically.
+        // If the conf.json doesnt say otherwise it wont even register its url.
+        if (config.getOrDefault("debug_promise", false))
+            new DebugPromiseService(20, vertx).registerUrls(rm)
 
         vertx.createHttpServer().requestHandler(rm.asClosure()).listen(port, host)
         container.logger.info("GameRegistry REST Server ready, listening on ${host}:${port}.")

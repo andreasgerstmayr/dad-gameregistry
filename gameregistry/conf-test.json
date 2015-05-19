@@ -8,6 +8,8 @@
   },
 
   "game-registry" : {
+    //"swagger_ui_basepath" : "/doc",
+    "debug_promise" : true,
     "host" : "localhost",
     "port" : 8080
   }

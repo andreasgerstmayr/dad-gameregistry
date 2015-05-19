@@ -2,15 +2,14 @@
 // This configures mongo-persistor to connect to a mongo server named 'mongo-server'.
 {
   "mongo-persistor" : {
-    // Name to send events to through vertx bus
     "address" : "gameregistry.db",
-    // Machine where mongo is running (another docker container, see Readme.md)
     "host" : "mongo-server",
     "db_name" : "gameregistry"
   },
 
   "game-registry" : {
     "host" : "0.0.0.0",
-    "port" : 8080
+    "port" : 8080,
+    "debug_promise" : false
   }
 }

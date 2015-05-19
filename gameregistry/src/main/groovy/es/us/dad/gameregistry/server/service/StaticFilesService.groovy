@@ -17,6 +17,10 @@ class StaticFilesService {
             throw new FileNotFoundException("web root doesn't exists: " + this.web_root)
     }
 
+    public String getWebRoot() {
+        return web_root
+    }
+
     public Promise<String> getSystemPathOf(String webpath) {
         Promise<String> p = new Promise()
         if (webpath.contains(".."))
