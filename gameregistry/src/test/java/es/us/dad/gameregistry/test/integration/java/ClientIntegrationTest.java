@@ -34,7 +34,7 @@ public class ClientIntegrationTest extends TestVerticle {
 
     @Test
     public void testCreateFromAddressWithPort() {
-        GameRegistryClient.createFromAddress("gameregistry.cloudapp.net:8080", vertx, event -> {
+        GameRegistryClient.createFromAddress("google.com:8080", vertx, event -> {
             if (event.succeeded()) {
                 GameRegistryClient client = event.result();
                 assertEquals(client.getBasePath(), "/api/v1");
@@ -50,7 +50,7 @@ public class ClientIntegrationTest extends TestVerticle {
 
     @Test
     public void testCreateFromAddressWithoutPort() {
-        GameRegistryClient.createFromAddress("gameregistry.cloudapp.net", vertx, event -> {
+        GameRegistryClient.createFromAddress("google.com", vertx, event -> {
             if (event.succeeded()) {
                 GameRegistryClient client = event.result();
                 assertEquals(8080, client.getPort());
@@ -214,7 +214,7 @@ public class ClientIntegrationTest extends TestVerticle {
         mongoCmd.putString("action", "drop_collection");
         mongoCmd.putString("collection", "game_session");
 
-        vertx.eventBus().send("gameregistry.db", (Object)mongoCmd, message -> {
+        vertx.eventBus().send("gameregistry.db", (Object) mongoCmd, message -> {
             JsonObject messageBody = (JsonObject)message.body();
             assertEquals("ok", messageBody.getString("status"));
             callback.run();

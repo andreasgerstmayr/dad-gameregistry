@@ -229,37 +229,36 @@ public class GameRegistryClient {
 		return this;
 	}
 
+    /**
+     * Returns the current user string.
+     * @return String used as user identifier (for the login server).
+     */
 	public String getUser() {
 		return this.user;
 	}
 
+    /**
+     * Returns the current token string.
+     * @return String used as a token (for the login server).
+     */
 	public String getToken() {
 		return this.token;
 	}
 
+    /**
+     * Returns the current base path used to access the GameRegistry REST api.
+     * @return String with the base path (ie "/api/v1").
+     */
 	public String getBasePath() {
 		return this.basepath;
 	}
 
+    /**
+     * Returns the current port used for the GameRegistry requests.
+     * @return An integer representing the port of the remote GameRegistry server.
+     */
     public int getPort() { return this.port; }
-	
-	/* 
-	 * Next should be methods to perform requests on the server. Needs more work, like
-	 * 
-	 * getUserLastSession (user, ...)
-	 * Get last session of a given user.
-	 * 
-	 * getUserSessions (user, begin = 0, count = 20, ...)
-	 * Get the first 'count' sessions after session number 'begin' of 'user'.
-	 * 
-	 * getUserSession (user, sessionid, ...)
-	 * Get a specific session given a session id
-	 * 
-	 * Probably all will be helper methods that will do a 'GET /sessions' with some
-	 * filter parameters under the hood.
-	 * ?
-	 */
-	
+
 	/**
 	 * Creates an HttpClientRequest object and sets it up for the GameRegistryServer.
 	 *  
@@ -486,17 +485,29 @@ public class GameRegistryClient {
 		}
 	}
 
+    /**
+     * Minimal AsyncResult implementation.
+     * @param <T> Whatever the result's type should be.
+     */
     static class AsyncResultImpl<T> implements AsyncResult<T> {
         private T _result;
         private Throwable _exception;
         private boolean _succeded;
 
+        /**
+         * The resulting AsyncResult will be successful, its parameter the result of the operation.
+         * @param t
+         */
         public AsyncResultImpl(T t) {
             _result = t;
             _succeded = true;
             _exception = null;
         }
 
+        /**
+         * The resulting AsyncResult will be failed, its parameter the cause of the failure.
+         * @param e
+         */
         public AsyncResultImpl(Throwable e) {
             _result = null;
             _succeded = false;
