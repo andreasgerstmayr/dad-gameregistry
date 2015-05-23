@@ -35,10 +35,6 @@ public class GameRegistryResponse {
 		 */
 		TIMEOUT,
 		/**
-		 * Server not found
-		 */
-		UNKNOWN_HOST,
-		/**
 		 * Connection refused by the server
 		 */
 		CONNECTION_REFUSED,
@@ -50,6 +46,10 @@ public class GameRegistryResponse {
 		 * 5xx http response code (ie Gateway Error, Internal Server Error, etc)
 		 */
 		SERVER_ERROR,
+		/**
+		 * Connection closed unexpectedly
+		 */
+		CONNECTION_CLOSED,
 		/**
 		 * Error while parsing the server's response. An invalid JSon,
          * an unexpected http status code (ie a 405 MethodNotAllowed in
@@ -78,10 +78,10 @@ public class GameRegistryResponse {
 	 */
 	public HttpClientResponse innerHttpResponse;
 	/**
-	 * If the response is not OK and the error is motivated by an exception
+	 * If the response is not OK and the error is motivated by a throwable
 	 * this will have a reference to it. In other case it will be null.
 	 */
-	public Exception innerException;
+	public Throwable innerThrowable;
 	
 	/**
 	 * Builds a new GameRegistryResponse and sets it up as an UNKNOWN response type, null sessions 
@@ -91,7 +91,7 @@ public class GameRegistryResponse {
 		responseType = ResponseType.UNKNOWN;
 		sessions = new GameSession[0];
 		innerHttpResponse = null;
-		innerException = null;
+		innerThrowable = null;
 	}
 	
 	/**
@@ -147,7 +147,7 @@ public class GameRegistryResponse {
 				rval.sessions = sessions.toArray(new GameSession[sessions.size()]);
 			} catch (Exception e) {
 				rval.responseType = ResponseType.INVALID_RESPONSE;
-				rval.innerException = e;
+				rval.innerThrowable = e;
 			}
 		}
 	}

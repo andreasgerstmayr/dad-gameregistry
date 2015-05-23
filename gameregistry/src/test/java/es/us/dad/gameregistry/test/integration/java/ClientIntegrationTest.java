@@ -1,22 +1,20 @@
 package es.us.dad.gameregistry.test.integration.java;
 
 import es.us.dad.gameregistry.client.GameRegistryClient;
-import es.us.dad.gameregistry.client.GameRegistryResponse;
 import es.us.dad.gameregistry.client.GameRegistryResponse.ResponseType;
 import es.us.dad.gameregistry.server.domain.GameSession;
 import org.junit.Test;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.Handler;
 import org.vertx.testtools.TestVerticle;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
@@ -82,12 +80,14 @@ public class ClientIntegrationTest extends TestVerticle {
         GameRegistryClient client = new GameRegistryClient(InetAddress.getLoopbackAddress(), vertx)
                 .setUser("myUser")
                 .setToken("myToken")
-                .setBasePath("/v1");
+                .setBasePath("/v1")
+                .setConnectionTimeout(10);
 
         assertEquals(8080, client.getPort());
         assertEquals("myUser", client.getUser());
         assertEquals("myToken", client.getToken());
         assertEquals("/v1", client.getBasePath());
+        assertEquals(10, client.getConnectionTimeout());
 
         client.setBasePath("/v1/");
         assertEquals("/v1", client.getBasePath());
@@ -96,7 +96,72 @@ public class ClientIntegrationTest extends TestVerticle {
     }
 
     @Test
-    public void testClientCreateSession() throws UnknownHostException {
+    public void testConnectionRefused() {
+        // Poking at a port that should be closed to get a refused connection error.
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLoopbackAddress(), 8081, vertx);
+        client
+                .setUser("testUser")
+                .setToken("testToken")
+                .getSession(UUID.randomUUID(), event -> {
+                    if (event.responseType == ResponseType.CONNECTION_REFUSED) {
+                        testComplete();
+                        return;
+                    }
+                    fail("Response type is not CONNECTION_REFUSED");
+                });
+    }
+
+    @Test
+    public void testConnectionClosed() {
+        // Poking at a port where a simple server listens, waits a few seconds and closes the connection.
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLoopbackAddress(), 8082, vertx);
+        client
+                .setUser("testUser")
+                .setToken("testToken")
+                .setBasePath("/")
+                .getSession(UUID.randomUUID(), event -> {
+                    if (event.responseType == ResponseType.CONNECTION_CLOSED) {
+                        testComplete();
+                        return;
+                    }
+                    container.logger().error("Response: " + event.responseType.toString());
+                    container.logger().error("inner throwable: " + event.innerThrowable);
+                    fail("Respose type is not CLOSED.");
+                });
+    }
+
+    /*
+    Im not able to force a timeout, it seems. Disabling test.
+
+    setConnectionTimeout seems to do nothing whatsoever. I tried setting a net server
+    that accepted connections but closed them after 5 minutes and the test itself
+    timed out before something happened.
+     */
+    /*
+    @Test
+    public void testConnectionTimeout() {
+        // Poking at a port where a simple server listens, waits a few seconds and closes the connection.
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLoopbackAddress(), 8083, vertx);
+        Date start = Date.from(Instant.now());
+        client
+                .setUser("testUser")
+                .setToken("testToken")
+                .setBasePath("/")
+                .setConnectionTimeout(3000)
+                .getSession(UUID.randomUUID(), event -> {
+                    container.logger().info("Event handler executed " + (Date.from(Instant.now()).getTime() - start.getTime())/1000 + " seconds later.");
+                    if (event.responseType == ResponseType.TIMEOUT) {
+                        testComplete();
+                        return;
+                    }
+                    container.logger().error("Response: " + event.responseType.toString());
+                    container.logger().error("inner throwable: " + event.innerThrowable);
+                    fail("Respose type is not TIMEOUT.");
+                });
+    }*/
+
+    @Test
+    public void testClientCreateSession() {
         GameRegistryClient client = new GameRegistryClient(InetAddress.getLoopbackAddress(), vertx);
         client.setUser("testUser");
         client.setToken("test");
@@ -237,18 +302,30 @@ public class ClientIntegrationTest extends TestVerticle {
             assertTrue(false);
         }
 
-        container.deployModule(System.getProperty("vertx.modulename"), testConfig, new AsyncResultHandler<String>() {
-            @Override
-            public void handle(AsyncResult<String> asyncResult) {
-                // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
-                if (asyncResult.failed()) {
-                    container.logger().error("Failed to deploy " + System.getProperty("vertx.modulename") + ": " + asyncResult.cause());
-                }
-                assertTrue(asyncResult.succeeded());
-                assertNotNull("deploymentID should not be null", asyncResult.result());
+        // Following is a mini-server that closes the connection 5 seconds after
+        // opened whatever happens. Used in testConnectionClosed.
+        vertx.createNetServer().connectHandler(socket -> {
+            vertx.setTimer(5 * 1000, event -> {
+                socket.close();
+            });
+        }).listen(8082);
+        // Following is a mini-server that closes the connection a lot after
+        // opened whatever happens. Used in testConnectionTimeout
+        vertx.createNetServer().connectHandler(socket -> {
+            vertx.setTimer(60 * 1000, event -> {
+                socket.close();
+            });
+        }).listen(8083);
 
-                clearDatabase(() -> startTests());
+        container.deployModule(System.getProperty("vertx.modulename"), testConfig, asyncResult -> {
+            // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
+            if (asyncResult.failed()) {
+                container.logger().error("Failed to deploy " + System.getProperty("vertx.modulename") + ": " + asyncResult.cause());
             }
+            assertTrue(asyncResult.succeeded());
+            assertNotNull("deploymentID should not be null", asyncResult.result());
+
+            clearDatabase(() -> startTests());
         });
     }
 

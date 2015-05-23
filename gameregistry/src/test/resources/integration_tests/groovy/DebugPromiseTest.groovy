@@ -20,21 +20,6 @@ def testDebugPromiseIsNotBlocking() {
      * it is answered before the original request is finally ended.
      */
 
-    /*
-    TODO: This doesnt work for some reason, but manually checking works.
-    What I mean is that if someone just runs the server with "debug_promise" : true
-    then make a request to /debug_promise, it will wait 20 secs for an answer but the
-    server is responsive in the meantime (any other request work while waiting).
-    But this tests does not reflect that behavior: the log shows
-    'Launching first request!', then 'Launching second request!', then waits,
-    then the first request is answered and then sometimes the second request is
-    answered an other times it spits an exception about a closed channel (probably
-    testCompleted() closes any pending request without subtleness).
-
-    Until I find an explanation I will mark this test as fail(), just to remember
-    there is something fishy going on and would be cool to know what.
-     */
-
     List<Integer> order = []
 
     // This gets the first request going

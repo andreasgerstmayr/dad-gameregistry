@@ -12,7 +12,6 @@ import org.vertx.java.core.dns.DnsResponseCode;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.http.HttpClientResponse;
-import org.vertx.java.core.impl.DefaultFutureResult;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.Vertx;
 
@@ -103,14 +102,12 @@ public class GameRegistryClient {
      *
      * @param address String with the GameRegistry server's address (ie "gameregistry,cloudapp.net:8080")
      * @param vertx A Vertx instance to create the Dns client and the GameRegistryClient.
-     * @param resultHandler To handle the result
-     * @throws UnknownHostException
-     * @throws URISyntaxException
+     * @param resultHandler Handler that will receive the GameRegistryClient object.
      */
     public static void createFromAddress(String address, Vertx vertx, Handler<AsyncResult<GameRegistryClient>> resultHandler) {
         int port;
         int colonsIndex = address.indexOf(':');
-        String hostname = address;
+        String hostname;
 
         if (colonsIndex == -1) {
             port = DEFAULT_PORT;
@@ -217,8 +214,8 @@ public class GameRegistryClient {
 	 * For example, if the GameRegistry responds to requests to the path
 	 * "/api/v1" (ie "/api/v1/sessions/" to request a collection of sessions)
 	 * the base path would be "/api/v1".
-	 * @param basePath
-	 * @return
+	 * @param basePath The base path where the API is located in the server.
+	 * @return This client (fluent interface).
 	 */
 	public GameRegistryClient setBasePath(String basePath) {
 		if (basePath.charAt(basePath.length()-1) =='/')
@@ -228,6 +225,15 @@ public class GameRegistryClient {
 
 		return this;
 	}
+
+    public GameRegistryClient setConnectionTimeout(int timeout) {
+        this.httpClient.setConnectTimeout(timeout);
+        return this;
+    }
+
+    public int getConnectionTimeout() {
+        return this.httpClient.getConnectTimeout();
+    }
 
     /**
      * Returns the current user string.
@@ -258,6 +264,14 @@ public class GameRegistryClient {
      * @return An integer representing the port of the remote GameRegistry server.
      */
     public int getPort() { return this.port; }
+
+	/**
+	 * Returns the InetAdress object used as host for creating the internal HttpClient.
+	 * @return This client (fluent interface).
+	 */
+	public InetAddress getHost() {
+		return this.host;
+	}
 
 	/**
 	 * Creates an HttpClientRequest object and sets it up for the GameRegistryServer.
@@ -318,7 +332,7 @@ public class GameRegistryClient {
 	 *  newSession.user = userId;
 	 *  
 	 *  client.addSession(session, new Handler&lt;GameRegistryResponse&gt;() {
-	 *    @Override
+	 *    &#64;Override
 	 *    void handle(GameRegistryResponse response) {
 	 *      // Add here code to handle the response (check response.responseType, etc)
 	 *    }
@@ -366,8 +380,8 @@ public class GameRegistryClient {
 	 * session provided to this method and replace that session with the new one.
 	 * 
 	 * @param session The new version of the GameSession to be replaced. 
-	 * @param responseHandler
-	 * @return This client.
+	 * @param responseHandler Handler that will receive the response.
+	 * @return This client (fluent interface).
 	 */
 	public GameRegistryClient updateSession(GameSession session, Handler<GameRegistryResponse> responseHandler) {
 		String url = basepath + "/sessions/" + session.getId();
@@ -475,10 +489,17 @@ public class GameRegistryClient {
 			@Override
 			public void handle(java.lang.Throwable throwable) {
 				GameRegistryResponse rval = new GameRegistryResponse();
-				
-				switch (throwable.getClass().getName()) {
-				// TODO Set rval.responsetype accordingly based on throwable's class name and info
-				}
+                rval.innerThrowable = throwable;
+
+                if (throwable instanceof java.net.ConnectException)
+                    rval.responseType = GameRegistryResponse.ResponseType.CONNECTION_REFUSED;
+                else if (throwable instanceof java.nio.channels.ClosedChannelException)
+                    rval.responseType = GameRegistryResponse.ResponseType.CONNECTION_CLOSED;
+				else if (throwable instanceof io.netty.channel.ConnectTimeoutException ||
+                        throwable instanceof java.nio.channels.InterruptedByTimeoutException)
+					rval.responseType = GameRegistryResponse.ResponseType.TIMEOUT;
+                else
+                    rval.responseType = GameRegistryResponse.ResponseType.UNKNOWN;
 				
 				handlers.gameRegistryResponseHandler.handle(rval);
 			}
@@ -496,7 +517,7 @@ public class GameRegistryClient {
 
         /**
          * The resulting AsyncResult will be successful, its parameter the result of the operation.
-         * @param t
+         * @param t Object to set as result of the AsyncResult instance.
          */
         public AsyncResultImpl(T t) {
             _result = t;
@@ -506,7 +527,7 @@ public class GameRegistryClient {
 
         /**
          * The resulting AsyncResult will be failed, its parameter the cause of the failure.
-         * @param e
+         * @param e Exception that will be set as cause of the AsyncResult instance.
          */
         public AsyncResultImpl(Throwable e) {
             _result = null;
