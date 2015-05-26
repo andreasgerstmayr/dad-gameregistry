@@ -2,6 +2,7 @@ package es.us.dad.gameregistry.server.controller
 
 import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.server.domain.GameSession
+import es.us.dad.gameregistry.server.exception.InvalidIdException
 import es.us.dad.gameregistry.server.exception.MethodNotAllowedException
 import es.us.dad.gameregistry.server.exception.ObjectNotFoundException
 import es.us.dad.gameregistry.server.service.ILoginService
@@ -24,10 +25,23 @@ class SessionController extends Controller {
         this.sessionService = sessionService
     }
 
+    private static UUID convertIdOrSendError(HttpServerRequest request, String id) {
+        try {
+            return UUID.fromString(id)
+        }
+        catch(IllegalArgumentException ignored) {
+            sendErrorResponse(request, new InvalidIdException(id))
+            return null
+        }
+    }
+
     @Authenticated
     @GET("/api/v1/sessions/:id")
     public void getSession(HttpServerRequest request) {
-        UUID id = UUID.fromString(request.params.get("id"))
+        UUID id = convertIdOrSendError(request, request.params.get("id"))
+        if (id == null) {
+            return
+        }
 
         sessionService.getSession(id).then({ GameSession session ->
             sendJsonResponse(request, session)
@@ -45,7 +59,10 @@ class SessionController extends Controller {
     @Authenticated
     @PUT("/api/v1/sessions/:id")
     public void changeSession(HttpServerRequest request) {
-        UUID id = UUID.fromString(request.params.get("id"))
+        UUID id = convertIdOrSendError(request, request.params.get("id"))
+        if (id == null) {
+            return
+        }
 
         sessionService.finishSession(id).then({ GameSession session ->
             sendJsonResponse(request, session)
@@ -57,7 +74,10 @@ class SessionController extends Controller {
     @Authenticated
     @DELETE("/api/v1/sessions/:id")
     public void deleteSession(HttpServerRequest request) {
-        UUID id = UUID.fromString(request.params.get("id"))
+        UUID id = convertIdOrSendError(request, request.params.get("id"))
+        if (id == null) {
+            return
+        }
 
         sessionService.deleteSession(id).then({
             sendJsonResponse(request, [:], HttpResponseStatus.NO_CONTENT)

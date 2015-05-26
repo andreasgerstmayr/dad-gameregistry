@@ -31,6 +31,10 @@ public class GameRegistryResponse {
 		 */
 		SESSION_NOT_FOUND,
 		/**
+		 * The request is invalid (e.g. invalid id).
+		 */
+		INVALID_REQUEST,
+		/**
 		 * The server did not answer to the request in time.
 		 */
 		TIMEOUT,
@@ -162,7 +166,7 @@ public class GameRegistryResponse {
 			// Client Error
 			switch (response.statusCode()) {
                 case 400:
-                    rval.responseType = ResponseType.INVALID_RESPONSE;
+                    rval.responseType = ResponseType.INVALID_REQUEST;
                     break;
                 case 401:
                 case 403:

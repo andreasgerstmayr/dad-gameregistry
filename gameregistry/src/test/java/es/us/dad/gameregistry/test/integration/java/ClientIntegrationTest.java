@@ -274,6 +274,38 @@ public class ClientIntegrationTest extends TestVerticle {
         });
     }
 
+    @Test
+    public void testWorkflow() throws UnknownHostException {
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx);
+
+        // user 'testUser' with token 'testToken' starts game 'testGame':
+        client.setUser("testUser").setToken("testToken");
+
+        GameSession session = new GameSession();
+        session.setStart(new Date());
+        session.setGame("testGame");
+
+
+        client.addSession(session, event -> {
+            assertEquals(ResponseType.OK, event.responseType);
+            assertEquals(1, event.sessions.length);
+
+            // this object also contains the newly generated ID of the session
+            GameSession createdSession = event.sessions[0];
+
+            // there is no end date because the game is running at the moment
+            assertNull(createdSession.getEnd());
+
+            // now the user finishes the game
+            createdSession.setEnd(new Date());
+            client.updateSession(createdSession, event2 -> {
+                assertEquals(ResponseType.OK, event2.responseType);
+                assertNotNull(event2.sessions[0].getEnd());
+                testComplete();
+            });
+        });
+    }
+
     private void clearDatabase(Runnable callback) {
         JsonObject mongoCmd = new JsonObject();
         mongoCmd.putString("action", "drop_collection");
