@@ -2,10 +2,8 @@ package es.us.dad.gameregistry.test.integration.java;
 
 import es.us.dad.gameregistry.client.GameRegistryClient;
 import es.us.dad.gameregistry.client.GameRegistryResponse.ResponseType;
-import es.us.dad.gameregistry.server.domain.GameSession;
+import es.us.dad.gameregistry.shared.domain.GameSession;
 import org.junit.Test;
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.testtools.TestVerticle;
 
@@ -14,7 +12,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 

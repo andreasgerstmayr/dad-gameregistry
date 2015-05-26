@@ -3,8 +3,7 @@ package es.us.dad.gameregistry.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import es.us.dad.gameregistry.server.domain.*;
-
+import es.us.dad.gameregistry.shared.domain.GameSession;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpClientResponse;
 import org.vertx.java.core.json.JsonArray;
@@ -75,7 +74,7 @@ public class GameRegistryResponse {
 	/**
 	 * Any GameSession object returned by the server will be in this array.
 	 */
-	public GameSession [] sessions;
+	public GameSession[] sessions;
 	/**
 	 * The HttpClientResponse object returned by the server, if any.
      * Otherwise null.

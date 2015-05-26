@@ -1,7 +1,7 @@
 package es.us.dad.gameregistry.server.controller
 
-import es.us.dad.gameregistry.GameRegistryConstants
-import es.us.dad.gameregistry.server.domain.GameSession
+import es.us.dad.gameregistry.shared.GameRegistryConstants
+import es.us.dad.gameregistry.shared.domain.GameSession
 import es.us.dad.gameregistry.server.exception.MethodNotAllowedException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.service.SessionService

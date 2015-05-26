@@ -1,8 +1,7 @@
 package es.us.dad.gameregistry.client;
 
-import es.us.dad.gameregistry.GameRegistryConstants;
-import es.us.dad.gameregistry.server.domain.GameSession;
-
+import es.us.dad.gameregistry.shared.GameRegistryConstants;
+import es.us.dad.gameregistry.shared.domain.GameSession;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
@@ -104,8 +103,8 @@ public class GameRegistryClient {
      * @param vertx A Vertx instance to create the Dns client and the GameRegistryClient.
      * @param resultHandler Handler that will receive the GameRegistryClient object.
      */
-    public static void createFromAddress(String address, Vertx vertx, Handler<AsyncResult<GameRegistryClient>> resultHandler) {
-        int port;
+    public static void createFromAddress(final String address, final Vertx vertx, final Handler<AsyncResult<GameRegistryClient>> resultHandler) {
+        final int port;
         int colonsIndex = address.indexOf(':');
         String hostname;
 
@@ -119,7 +118,7 @@ public class GameRegistryClient {
 				hostname = address.substring(0, colonsIndex);
             } catch (Exception e) {
                 // Fail the async result becouse port is not a number
-                resultHandler.handle(new AsyncResultImpl<>(e));
+                resultHandler.handle(new AsyncResultImpl<GameRegistryClient>(e));
                 return;
             }
         }
@@ -134,19 +133,19 @@ public class GameRegistryClient {
                 // with code 3 (NXDOMAIN)
                 if (lookUpResult.succeeded() && lookUpResult.result() != null) {
                     // Succeed our async result with a new GameRegistryClienet
-                    resultHandler.handle(new AsyncResultImpl<>(new GameRegistryClient(lookUpResult.result(), port, vertx)));
+                    resultHandler.handle(new AsyncResultImpl<GameRegistryClient>(new GameRegistryClient(lookUpResult.result(), port, vertx)));
                 } else {
                     // Either is succeeded but null or failed
                     if (lookUpResult.succeeded())
-                        resultHandler.handle(new AsyncResultImpl<>(new UnknownHostException("Couldn't resolve address (result is null): " + address)));
+                        resultHandler.handle(new AsyncResultImpl<GameRegistryClient>(new UnknownHostException("Couldn't resolve address (result is null): " + address)));
                     else {
                         // It failed. Is it an NXDOMAIN error?
                         if (lookUpResult.cause() instanceof DnsException && ((DnsException) lookUpResult.cause()).code() == DnsResponseCode.NXDOMAIN) {
-                            resultHandler.handle(new AsyncResultImpl<>(new UnknownHostException("Couldn't resolve address (NXDOMAIN error):" + address)));
+                            resultHandler.handle(new AsyncResultImpl<GameRegistryClient>(new UnknownHostException("Couldn't resolve address (NXDOMAIN error):" + address)));
                         }
                         // If it isnt just fail with whatever the cause of the async result was.
                         else
-                            resultHandler.handle(new AsyncResultImpl<>(lookUpResult.cause()));
+                            resultHandler.handle(new AsyncResultImpl<GameRegistryClient>(lookUpResult.cause()));
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package es.us.dad.gameregistry;
+package es.us.dad.gameregistry.shared;
 
 public class GameRegistryConstants {
 

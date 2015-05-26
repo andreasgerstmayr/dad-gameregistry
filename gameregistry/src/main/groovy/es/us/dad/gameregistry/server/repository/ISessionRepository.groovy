@@ -1,7 +1,7 @@
 package es.us.dad.gameregistry.server.repository
 
 import com.darylteo.vertx.promises.groovy.Promise
-import es.us.dad.gameregistry.server.domain.GameSession
+import es.us.dad.gameregistry.shared.domain.GameSession
 
 interface ISessionRepository {
 
