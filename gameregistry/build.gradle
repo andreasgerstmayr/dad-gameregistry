@@ -172,3 +172,9 @@ task apidocPdf(type: Exec, dependsOn: apidocHtml, group: 'documentation') {
   commandLine 'phantomjs'
   args = ['doc/html-to-pdf.js', 'build/docs/apidoc/html/index.html', 'build/docs/apidoc/pdf/apidoc.pdf', 'A4']
 }
+
+// copy client sources
+task copyClientSources(type: Sync) {
+    from 'src/main/java/es/us/dad/gameregistry'
+    into '../gameregistry-client-example/src/main/java/es/us/dad/gameregistry'
+}

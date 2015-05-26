@@ -1,7 +1,7 @@
 package es.us.dad.gameregistry.server.service
 
 import com.darylteo.vertx.promises.groovy.Promise
-import es.us.dad.gameregistry.server.domain.GameSession
+import es.us.dad.gameregistry.shared.domain.GameSession
 import es.us.dad.gameregistry.server.repository.ISessionRepository
 import org.vertx.groovy.core.Vertx
 import org.vertx.java.core.logging.Logger

@@ -1,12 +1,12 @@
 package es.us.dad.gameregistry.server.controller
 
 import com.darylteo.vertx.promises.groovy.Promise
-import es.us.dad.gameregistry.GameRegistryConstants
-import es.us.dad.gameregistry.server.domain.DomainObject
+import es.us.dad.gameregistry.shared.domain.DomainObject
 import es.us.dad.gameregistry.server.exception.AuthenticationException
 import es.us.dad.gameregistry.server.exception.RestException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.util.*
+import es.us.dad.gameregistry.shared.GameRegistryConstants
 import groovy.json.JsonOutput
 import io.netty.handler.codec.http.HttpResponseStatus
 import org.vertx.groovy.core.http.HttpServerRequest
