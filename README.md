@@ -8,4 +8,6 @@ Group 18 at Tue, 8:30
 
 **Report and documentation:** [latex sources](memoria/), [PDF](memoria/MemoriaGrupo18_main.pdf)
 
+**Example project which consumes our client:** [gameregistry-client-example](gameregistry-client-example/), [GameRegistryClientExample.java](gameregistry-client-example/src/main/java/es/us/dad/GameRegistryClientExample.java)
+
 **Redmine project management:** https://projetsii.informatica.us.es/projects/lq3vqrtzfnh2nx9yhpk
