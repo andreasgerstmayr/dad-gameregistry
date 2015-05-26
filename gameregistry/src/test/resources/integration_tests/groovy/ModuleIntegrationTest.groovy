@@ -15,7 +15,7 @@ import static org.vertx.testtools.VertxAssert.*
 def testRestServerIsRunning() {
     // our module is deployed; no need to start the verticle here
 
-    vertx.createHttpClient().setPort(8080).getNow("/", { HttpClientResponse resp ->
+    vertx.createHttpClient().setPort(8080).getNow("/something/that/dosnt/exists.html", { HttpClientResponse resp ->
         assertEquals(404, resp.statusCode)
         testComplete()
     })

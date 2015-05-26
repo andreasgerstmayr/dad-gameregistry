@@ -33,11 +33,6 @@ class RestServer extends Verticle {
         SessionService sessionService = new SessionService(vertx, container.logger, sessionRepository)
         StaticFilesService fileService = new StaticFilesService("web", vertx)
 
-        // create instances of all controllers and register the URLs to the RouteMatcher
-        new SessionsController(loginService, sessionService).registerUrls(rm)
-        new SessionController(loginService, sessionService).registerUrls(rm)
-        new StaticFilesController(staticWebBasePath, fileService, container.logger).registerUrls(rm)
-
         // This was asked by Pablo (the boss). He wants to see a test where a promise
         // is fullfilled after an artificial an exagerated wait time (around 20 secs)
         // and see if the server is able to answer requests while waiting. He wants to
@@ -45,6 +40,14 @@ class RestServer extends Verticle {
         // If the conf.json doesnt say otherwise it wont even register its url.
         if (config.getOrDefault("debug_promise", false))
             new DebugPromiseService(20, vertx).registerUrls(rm)
+
+        // create instances of all controllers and register the URLs to the RouteMatcher
+        new SessionsController(loginService, sessionService).registerUrls(rm)
+        new SessionController(loginService, sessionService).registerUrls(rm)
+        // The StaticFilesController should be the last registered controller becouse regular
+        // expressions and might be bound to '/', catching any request even if a more specific
+        // route exists (but was registered afterward).
+        new StaticFilesController(staticWebBasePath, fileService, container.logger).registerUrls(rm)
 
         vertx.createHttpServer().requestHandler(rm.asClosure()).listen(port, host)
         container.logger.info("GameRegistry REST Server ready, listening on ${host}:${port}.")

@@ -28,7 +28,7 @@ def testDebugPromiseIsNotBlocking() {
 
     client.getNow(path, { response ->
         // This code will execute around 20 secs after the getNow call was performed
-        container.logger.info("#4: First request answered.")
+        container.logger.info("#4: First request answered: " + response.getStatusCode())
         order.add(4)
 
         assertEquals([1,2,3,4], order)
