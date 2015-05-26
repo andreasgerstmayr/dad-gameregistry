@@ -8,6 +8,7 @@
   },
 
   "game-registry" : {
+    "static_web_basepath" : "/",
     "host" : "0.0.0.0",
     "port" : 8080,
     "debug_promise" : false

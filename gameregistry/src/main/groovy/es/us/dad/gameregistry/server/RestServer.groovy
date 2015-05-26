@@ -17,13 +17,13 @@ class RestServer extends Verticle {
 
     private final String DEFAULT_HOST = "localhost"
     private final int DEFAULT_PORT = 8080
-    private final String DEFAULT_SWAGGER_WEB = "/doc";
+    private final String DEFAULT_STATIC_WEB = "/doc";
 
     def start() {
         def config = container.config
         String host = config.getOrDefault("host", DEFAULT_HOST) as String
         int port = config.getOrDefault("port", DEFAULT_PORT) as int
-        String swagger_ui_basepath = config.getOrDefault("swagger_ui_basepath", DEFAULT_SWAGGER_WEB)
+        String staticWebBasePath = config.getOrDefault("static_web_basepath", DEFAULT_STATIC_WEB)
         Boolean debug_promise = config.getOrDefault("debug_promise", false)
 
         RouteMatcher rm = new RouteMatcher()
@@ -36,7 +36,7 @@ class RestServer extends Verticle {
         // create instances of all controllers and register the URLs to the RouteMatcher
         new SessionsController(loginService, sessionService).registerUrls(rm)
         new SessionController(loginService, sessionService).registerUrls(rm)
-        new StaticFilesController(swagger_ui_basepath, fileService, container.logger).registerUrls(rm)
+        new StaticFilesController(staticWebBasePath, fileService, container.logger).registerUrls(rm)
 
         // This was asked by Pablo (the boss). He wants to see a test where a promise
         // is fullfilled after an artificial an exagerated wait time (around 20 secs)
