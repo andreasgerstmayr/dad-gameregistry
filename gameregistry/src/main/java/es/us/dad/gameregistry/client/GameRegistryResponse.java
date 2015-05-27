@@ -134,9 +134,9 @@ public class GameRegistryResponse {
 				JsonObject jsonBody = new JsonObject(body.toString());
 			
 				// Find GameSessions and add them to response.sessions 
-				if (jsonBody.isArray()) {
+				if (jsonBody.containsField("count") && jsonBody.containsField("sessions")) {
 					// A collection of GameSession objects
-					JsonArray jsonArray = jsonBody.asArray();
+					JsonArray jsonArray = jsonBody.getArray("sessions").asArray();
 					for (int i = 0; i < jsonArray.size(); i++) {
 						JsonObject jsonSession = jsonArray.get(i);
 						sessions.add(new GameSession(jsonSession.toMap()));

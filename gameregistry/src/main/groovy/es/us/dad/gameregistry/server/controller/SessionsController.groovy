@@ -25,7 +25,7 @@ class SessionsController extends Controller {
         String user = request.params.get("user")
 
         sessionService.findSessions(null, user).then({ List<GameSession> sessions ->
-            sendJsonResponse(request, [count: sessions.size(), sessions: sessions])
+            sendJsonResponse(request, [count: sessions.size(), sessions: sessions.collect { it.toJsonMap() }])
         }).fail({ Exception ex ->
             sendErrorResponse(request, ex)
         })

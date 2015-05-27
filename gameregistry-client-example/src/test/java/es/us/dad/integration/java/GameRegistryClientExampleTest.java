@@ -15,7 +15,28 @@ import static org.vertx.testtools.VertxAssert.*;
 
 
 public class GameRegistryClientExampleTest extends TestVerticle {
-    private void finishGame(GameRegistryClient client, String user, String token, GameSession session) {
+
+
+    private void listGames(GameRegistryClient client, String user, String token) {
+        client.setUser(user).setToken(token);
+        client.getSessions(null, new Handler<GameRegistryResponse>() {
+
+            @Override
+            public void handle(GameRegistryResponse event) {
+                assertEquals(GameRegistryResponse.ResponseType.OK, event.responseType);
+
+                container.logger().info("found " + event.sessions.length + " game sessions:");
+                for (GameSession gameSession : event.sessions) {
+                    container.logger().info("found game session: " + gameSession);
+                }
+
+                testComplete();
+            }
+
+        });
+    }
+
+    private void finishGame(final GameRegistryClient client, final String user, final String token, GameSession session) {
         // now the user has finished the game
         session.setEnd(new Date());
 
@@ -28,7 +49,7 @@ public class GameRegistryClientExampleTest extends TestVerticle {
                 assertNotNull(event.sessions[0].getEnd());
 
                 container.logger().info("game session was updated.");
-                testComplete();
+                listGames(client, user, token);
             }
 
         });
@@ -80,4 +101,5 @@ public class GameRegistryClientExampleTest extends TestVerticle {
         initialize();
         startTests();
     }
+
 }
