@@ -10,5 +10,6 @@ interface ISessionRepository {
     Promise<Void> delete(UUID id)
     Promise<GameSession> findById(UUID id)
     Promise<List<GameSession>> find(UUID id, String user)
+    Promise<Void> cleanup(long maxAge)
 
 }

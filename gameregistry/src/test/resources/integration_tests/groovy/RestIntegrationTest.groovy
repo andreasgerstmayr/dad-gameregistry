@@ -141,13 +141,12 @@ def clearDatabase(Closure callback) {
 
 
 VertxTests.initialize(this)
-Map<String, Object> testConfig = new JsonObject(new File('conf-test.json').getText('UTF-8')).toMap()
-container.deployModule(System.getProperty("vertx.modulename"), testConfig, { asyncResult ->
+container.deployModule(System.getProperty("vertx.modulename"), TestUtils.readTestConfig(), { asyncResult ->
     assertTrue(asyncResult.succeeded)
     assertNotNull("deploymentID should not be null", asyncResult.result())
 
     // clear database before starting each test
-    clearDatabase ({
+    TestUtils.clearDatabase(vertx, {
         VertxTests.startTests(this)
     })
 })

@@ -7,11 +7,8 @@ import org.junit.Test;
 import org.vertx.java.core.json.JsonObject;
 import org.vertx.testtools.TestVerticle;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.UUID;
 
@@ -303,33 +300,12 @@ public class ClientIntegrationTest extends TestVerticle {
         });
     }
 
-    private void clearDatabase(Runnable callback) {
-        JsonObject mongoCmd = new JsonObject();
-        mongoCmd.putString("action", "drop_collection");
-        mongoCmd.putString("collection", "game_session");
-
-        vertx.eventBus().send("gameregistry.db", (Object) mongoCmd, message -> {
-            JsonObject messageBody = (JsonObject)message.body();
-            assertEquals("ok", messageBody.getString("status"));
-            callback.run();
-        });
-    }
-
     @Override
     public void start() {
         // Make sure we call initialize() - this sets up the assert stuff so assert functionality works correctly
         initialize();
         // Deploy the module - the System property `vertx.modulename` will contain the name of the module so you
         // don't have to hardecode it in your tests
-
-        JsonObject testConfig = null;
-        try {
-            testConfig = new JsonObject(new String(Files.readAllBytes(Paths.get("conf-test.json"))));
-        }
-        catch (IOException ex) {
-            container.logger().error("Could not read config file");
-            assertTrue(false);
-        }
 
         // Following is a mini-server that closes the connection 5 seconds after
         // opened whatever happens. Used in testConnectionClosed.
@@ -346,6 +322,7 @@ public class ClientIntegrationTest extends TestVerticle {
             });
         }).listen(8083);
 
+        JsonObject testConfig = TestUtils.readTestConfig(container.logger());
         container.deployModule(System.getProperty("vertx.modulename"), testConfig, asyncResult -> {
             // Deployment is asynchronous and this this handler will be called when it's complete (or failed)
             if (asyncResult.failed()) {
@@ -354,7 +331,7 @@ public class ClientIntegrationTest extends TestVerticle {
             assertTrue(asyncResult.succeeded());
             assertNotNull("deploymentID should not be null", asyncResult.result());
 
-            clearDatabase(() -> startTests());
+            TestUtils.clearDatabase(vertx, this::startTests);
         });
     }
 

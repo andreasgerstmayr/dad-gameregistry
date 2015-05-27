@@ -1,6 +1,7 @@
 package es.us.dad.gameregistry.server.repository
 
 import com.darylteo.vertx.promises.groovy.Promise
+import es.us.dad.gameregistry.shared.domain.DomainObject
 import es.us.dad.gameregistry.shared.domain.GameSession
 import es.us.dad.gameregistry.server.exception.DatabaseException
 import es.us.dad.gameregistry.server.exception.ObjectNotFoundException
@@ -27,7 +28,7 @@ class MongoSessionRepository implements ISessionRepository {
 
     @Override
     Promise<GameSession> create(GameSession session) {
-        Promise<GameSession> p = new Promise()
+        Promise<GameSession> p = new Promise<GameSession>()
 
         vertx.eventBus.send("gameregistry.db", [action    : "save",
                                                 collection: "game_session",
@@ -47,7 +48,7 @@ class MongoSessionRepository implements ISessionRepository {
 
     @Override
     Promise<GameSession> update(GameSession session) {
-        Promise<GameSession> p = new Promise()
+        Promise<GameSession> p = new Promise<GameSession>()
 
         vertx.eventBus.send("gameregistry.db", [action    : "update",
                                                 collection: "game_session",
@@ -69,7 +70,7 @@ class MongoSessionRepository implements ISessionRepository {
 
     @Override
     Promise<Void> delete(UUID id) {
-        Promise<Void> p = new Promise()
+        Promise<Void> p = new Promise<Void>()
 
         vertx.eventBus.send("gameregistry.db", [action    : "delete",
                                                 collection: "game_session",
@@ -92,7 +93,7 @@ class MongoSessionRepository implements ISessionRepository {
 
     @Override
     Promise<GameSession> findById(UUID id) {
-        Promise<GameSession> p = new Promise()
+        Promise<GameSession> p = new Promise<GameSession>()
 
         find(id, null).then({ List<GameSession> sessions ->
             if (sessions.isEmpty())
@@ -108,7 +109,7 @@ class MongoSessionRepository implements ISessionRepository {
 
     @Override
     Promise<List<GameSession>> find(UUID id, String user) {
-        Promise<List<GameSession>> p = new Promise()
+        Promise<List<GameSession>> p = new Promise<List<GameSession>>()
 
         Map matcher = [:]
         if (id != null)
@@ -128,6 +129,30 @@ class MongoSessionRepository implements ISessionRepository {
                 }
 
                 p.fulfill(sessions)
+            } else {
+                DatabaseException ex = prepareAndLogException(messageBody)
+                p.reject(ex)
+            }
+        }
+
+        return p
+    }
+
+    @Override
+    Promise<Void> cleanup(long maxAge) {
+        Promise<Void> p = new Promise<Void>()
+
+        // maxAge: seconds
+        Date minAgeDate = new Date(new Date().getTime() - maxAge * 1000)
+        long minAge = DomainObject.formatDate(minAgeDate)
+        vertx.eventBus.send("gameregistry.db", [action    : "delete",
+                                                collection: "game_session",
+                                                matcher   : ["end"  : null,
+                                                             "start": ['$lt': minAge]]]) { Message message ->
+            Map messageBody = message.body
+
+            if (messageBody["status"].equals("ok")) {
+                p.fulfill(null)
             } else {
                 DatabaseException ex = prepareAndLogException(messageBody)
                 p.reject(ex)

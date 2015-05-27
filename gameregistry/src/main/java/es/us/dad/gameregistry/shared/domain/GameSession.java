@@ -40,6 +40,11 @@ public class GameSession extends DomainObject {
         return json;
     }
 
+    @Override
+    public String toString() {
+        return String.format("<GameSession #%s: %s/%s, %s - %s>", id, user, game, start, end);
+    }
+
     public UUID getId() {
         return id;
     }

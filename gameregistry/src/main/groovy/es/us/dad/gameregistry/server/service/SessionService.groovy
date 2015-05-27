@@ -74,4 +74,12 @@ class SessionService {
         return sessionRepository.delete(id)
     }
 
+    /**
+     * deletes all sessions which are open longer than maxAge
+     * @param maxAge maximum age in seconds
+     */
+    public Promise<Void> cleanup(long maxAge) {
+        return sessionRepository.cleanup(maxAge)
+    }
+
 }

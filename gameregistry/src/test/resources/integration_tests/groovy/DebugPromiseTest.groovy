@@ -1,9 +1,7 @@
 package integration_tests.groovy
 
 import org.vertx.groovy.core.http.HttpClient
-import org.vertx.groovy.core.http.HttpClientResponse
 import org.vertx.groovy.testtools.VertxTests
-import org.vertx.java.core.json.JsonObject
 
 import static org.vertx.testtools.VertxAssert.*
 
@@ -49,8 +47,7 @@ def testDebugPromiseIsNotBlocking() {
 }
 
 VertxTests.initialize(this)
-Map<String, Object> testConfig = new JsonObject(new File('conf-test.json').getText('UTF-8')).toMap()
-container.deployModule(System.getProperty("vertx.modulename"), testConfig, { asyncResult ->
+container.deployModule(System.getProperty("vertx.modulename"), TestUtils.readTestConfig(), { asyncResult ->
     assertTrue(asyncResult.succeeded)
     assertNotNull("deploymentID should not be null", asyncResult.result())
 
