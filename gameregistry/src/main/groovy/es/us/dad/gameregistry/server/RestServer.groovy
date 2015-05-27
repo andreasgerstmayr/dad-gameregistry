@@ -24,7 +24,9 @@ class RestServer extends Verticle {
         String host = config.getOrDefault("host", DEFAULT_HOST) as String
         int port = config.getOrDefault("port", DEFAULT_PORT) as int
         String staticWebBasePath = config.getOrDefault("static_web_basepath", DEFAULT_STATIC_WEB)
-        Boolean debug_promise = config.getOrDefault("debug_promise", false)
+        boolean debug_promise = config.getOrDefault("debug_promise", false)
+        long cleanup_interval = config.getOrDefault("cleanup_interval", 60*60) as long // seconds
+        long gamesession_maxage = config.getOrDefault("gamesession_maxage", 60*60*24) as long // seconds
 
         RouteMatcher rm = new RouteMatcher()
 
@@ -38,7 +40,7 @@ class RestServer extends Verticle {
         // and see if the server is able to answer requests while waiting. He wants to
         // ensure Promise is not blocking, basically.
         // If the conf.json doesnt say otherwise it wont even register its url.
-        if (config.getOrDefault("debug_promise", false))
+        if (debug_promise)
             new DebugPromiseService(20, vertx).registerUrls(rm)
 
         // create instances of all controllers and register the URLs to the RouteMatcher
@@ -48,6 +50,11 @@ class RestServer extends Verticle {
         // expressions and might be bound to '/', catching any request even if a more specific
         // route exists (but was registered afterward).
         new StaticFilesController(staticWebBasePath, fileService, container.logger).registerUrls(rm)
+
+        // start periodic cleanup task
+        vertx.setPeriodic(cleanup_interval * 1000, {
+            sessionService.cleanup(gamesession_maxage)
+        })
 
         vertx.createHttpServer().requestHandler(rm.asClosure()).listen(port, host)
         container.logger.info("GameRegistry REST Server ready, listening on ${host}:${port}.")
