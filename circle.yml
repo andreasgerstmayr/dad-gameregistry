@@ -13,3 +13,5 @@ test:
   post:
     - ./gradlew modZip
     - ./gradlew apidocPdf
+    - ./gradlew prepareClientExample
+    - cd ../gameregistry-client-example && mvn install

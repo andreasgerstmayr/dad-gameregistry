@@ -4,11 +4,16 @@ import es.us.dad.gameregistry.client.GameRegistryClient;
 import es.us.dad.gameregistry.client.GameRegistryResponse;
 import es.us.dad.gameregistry.shared.domain.GameSession;
 import org.junit.Test;
+import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.json.JsonObject;
 import org.vertx.testtools.TestVerticle;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 
 import static org.vertx.testtools.VertxAssert.*;
@@ -96,10 +101,43 @@ public class GameRegistryClientExampleTest extends TestVerticle {
         startGame(client, "testUser", "testToken");
     }
 
+    /**
+     * try to deploy GameRegistry module (needed for tests).
+     * it's also possible to start the gameregistry server manually
+     * @param callback
+     */
+    private void deployGameRegistryModule(final Handler<Void> callback) {
+        JsonObject testConfig = null;
+        try {
+            testConfig = new JsonObject(new String(Files.readAllBytes(Paths.get("../gameregistry/conf-test.json"))));
+        }
+        catch (IOException ex) {
+            container.logger().info("Could not read config file");
+            callback.handle(null);
+            return;
+        }
+
+        container.deployModule("es.us.dad~gameregistry~0.0.1", testConfig, new Handler<AsyncResult<String>>() {
+            @Override
+            public void handle(AsyncResult<String> result) {
+                if(result.failed()) {
+                    container.logger().info("Could not deploy gameregistry module:");
+                    container.logger().info(result.cause());
+                }
+                callback.handle(null);
+            }
+        });
+    }
+
     @Override
     public void start() {
         initialize();
-        startTests();
+        deployGameRegistryModule(new Handler<Void>() {
+            @Override
+            public void handle(Void aVoid) {
+                startTests();
+            }
+        });
     }
 
 }

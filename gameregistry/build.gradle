@@ -174,7 +174,12 @@ task apidocPdf(type: Exec, dependsOn: apidocHtml, group: 'documentation') {
 }
 
 // copy client sources
-task copyClientSources(type: Sync) {
+task copyClientSources(type: Sync, group: 'client-example') {
     from 'src/main/java/es/us/dad/gameregistry'
     into '../gameregistry-client-example/src/main/java/es/us/dad/gameregistry'
+}
+
+task prepareClientExample(type: Sync, dependsOn: copyMod, group: 'client-example') {
+  from 'build/mods/es.us.dad~gameregistry~0.0.1'
+  into '../gameregistry-client-example/target/mods/es.us.dad~gameregistry~0.0.1'
 }

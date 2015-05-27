@@ -26,7 +26,6 @@ public class TestUtils {
     }
 
     public static JsonObject readTestConfig(Logger logger) {
-        JsonObject testConfig = null;
         try {
             return new JsonObject(new String(Files.readAllBytes(Paths.get("conf-test.json"))));
         }
