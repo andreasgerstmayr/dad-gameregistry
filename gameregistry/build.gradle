@@ -165,7 +165,7 @@ task installBootprint(type: NpmTask) {
 
 task apidocHtml(type: NodeTask, dependsOn: installBootprint, group: 'documentation') {
   script = file("node_modules/bootprint/bootprint-cli.js")
-  args = ['swagger', 'src/main/resources/web/swagger.json', "build/docs/apidoc/html"]
+  args = ['swagger', 'src/main/resources/web/doc/swagger.json', "build/docs/apidoc/html"]
 }
 
 task apidocPdf(type: Exec, dependsOn: apidocHtml, group: 'documentation') {
