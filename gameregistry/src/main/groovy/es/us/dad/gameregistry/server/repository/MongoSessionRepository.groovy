@@ -13,7 +13,7 @@ class MongoSessionRepository implements ISessionRepository {
     private final Vertx vertx
     private final Logger logger
 
-    public MongoSessionRepository (Vertx vertx, Logger logger) {
+    public MongoSessionRepository(Vertx vertx, Logger logger) {
         this.vertx = vertx
         this.logger = logger
     }
@@ -29,15 +29,14 @@ class MongoSessionRepository implements ISessionRepository {
     Promise<GameSession> create(GameSession session) {
         Promise<GameSession> p = new Promise()
 
-        vertx.eventBus.send("gameregistry.db", [action: "save",
+        vertx.eventBus.send("gameregistry.db", [action    : "save",
                                                 collection: "game_session",
-                                                document: session.toJsonMap()]) { Message message ->
+                                                document  : session.toJsonMap()]) { Message message ->
             Map messageBody = message.body
 
             if (messageBody["status"].equals("ok")) {
                 p.fulfill(session)
-            }
-            else {
+            } else {
                 DatabaseException ex = prepareAndLogException(messageBody)
                 p.reject(ex)
             }
@@ -50,17 +49,16 @@ class MongoSessionRepository implements ISessionRepository {
     Promise<GameSession> update(GameSession session) {
         Promise<GameSession> p = new Promise()
 
-        vertx.eventBus.send("gameregistry.db", [action: "update",
+        vertx.eventBus.send("gameregistry.db", [action    : "update",
                                                 collection: "game_session",
-                                                criteria: [id: session.id.toString()],
-                                                objNew: session.toJsonMap(),
-                                                upsert: true, multi: false]) { Message message ->
+                                                criteria  : [id: session.id.toString()],
+                                                objNew    : session.toJsonMap(),
+                                                upsert    : true, multi: false]) { Message message ->
             Map messageBody = message.body
 
             if (messageBody["status"].equals("ok")) {
                 p.fulfill(session)
-            }
-            else {
+            } else {
                 DatabaseException ex = prepareAndLogException(messageBody)
                 p.reject(ex)
             }
@@ -73,18 +71,17 @@ class MongoSessionRepository implements ISessionRepository {
     Promise<Void> delete(UUID id) {
         Promise<Void> p = new Promise()
 
-        vertx.eventBus.send("gameregistry.db", [action: "delete",
+        vertx.eventBus.send("gameregistry.db", [action    : "delete",
                                                 collection: "game_session",
-                                                matcher: [id: id.toString()]]) { Message message ->
+                                                matcher   : [id: id.toString()]]) { Message message ->
             Map messageBody = message.body
 
             if (messageBody["status"].equals("ok")) {
                 if (messageBody["number"] == 1)
-                    p.fulfill(void)
+                    p.fulfill(null)
                 else
                     p.reject(new ObjectNotFoundException("GameSession not found."));
-            }
-            else {
+            } else {
                 DatabaseException ex = prepareAndLogException(messageBody)
                 p.reject(ex)
             }
@@ -97,12 +94,12 @@ class MongoSessionRepository implements ISessionRepository {
     Promise<GameSession> findById(UUID id) {
         Promise<GameSession> p = new Promise()
 
-        find(id, null).then ({ List<GameSession> sessions ->
+        find(id, null).then({ List<GameSession> sessions ->
             if (sessions.isEmpty())
                 p.reject(new ObjectNotFoundException("GameSession not found."))
             else
                 p.fulfill(sessions.first())
-        }, { Exception ex ->
+        }).fail({ Exception ex ->
             p.reject(ex)
         })
 
@@ -119,9 +116,9 @@ class MongoSessionRepository implements ISessionRepository {
         if (user != null)
             matcher['user'] = user
 
-        vertx.eventBus.send("gameregistry.db", [action: "find",
+        vertx.eventBus.send("gameregistry.db", [action    : "find",
                                                 collection: "game_session",
-                                                matcher: matcher]) { Message message ->
+                                                matcher   : matcher]) { Message message ->
             Map messageBody = message.body
 
             if (messageBody["status"].equals("ok")) {
@@ -131,8 +128,7 @@ class MongoSessionRepository implements ISessionRepository {
                 }
 
                 p.fulfill(sessions)
-            }
-            else {
+            } else {
                 DatabaseException ex = prepareAndLogException(messageBody)
                 p.reject(ex)
             }

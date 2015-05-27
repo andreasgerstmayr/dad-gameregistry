@@ -56,11 +56,9 @@ class SessionService {
         sessionRepository.findById(id).then({ GameSession session ->
             session.end = new Date()
             return sessionRepository.update(session)
-        }, { Exception ex ->
-            p.reject(ex)
         }).then({ GameSession session ->
             p.fulfill(session)
-        }, { Exception ex ->
+        }).then({ Exception ex ->
             p.reject(ex)
         })
 

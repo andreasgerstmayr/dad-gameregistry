@@ -14,8 +14,8 @@ class StaticFilesController {
         this.fileService = fileService
         this.logger = logger
 
-        if (base_path[base_path.length()-1] == '/')
-            this.base_path = base_path.substring(0, base_path.length()-1)
+        if (base_path[base_path.length() - 1] == '/')
+            this.base_path = base_path.substring(0, base_path.length() - 1)
         else
             this.base_path = base_path
     }
@@ -29,9 +29,9 @@ class StaticFilesController {
 
             fileService.getSystemPathOf(withoutBasePath).then({ String system_path ->
                 request.response.sendFile(system_path)
-            }, { Throwable ex ->
+            }).fail({ Throwable ex ->
                 request.response.setStatusCode(404)
-                                .end()
+                        .end()
             })
         })
     }

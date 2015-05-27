@@ -24,9 +24,9 @@ class SessionsController extends Controller {
     public void getSessions(HttpServerRequest request) {
         String user = request.params.get("user")
 
-        sessionService.findSessions(null, user).then ({ List<GameSession> sessions ->
+        sessionService.findSessions(null, user).then({ List<GameSession> sessions ->
             sendJsonResponse(request, [count: sessions.size(), sessions: sessions])
-        }, { Exception ex ->
+        }).fail({ Exception ex ->
             sendErrorResponse(request, ex)
         })
     }
@@ -41,7 +41,7 @@ class SessionsController extends Controller {
             String game = data.getString("game")
             sessionService.startSession(user, game).then({ GameSession newSession ->
                 sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
-            }, { Exception ex ->
+            }).fail({ Exception ex ->
                 sendErrorResponse(request, ex)
             })
         }

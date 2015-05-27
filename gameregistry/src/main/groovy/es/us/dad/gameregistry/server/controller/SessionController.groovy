@@ -26,7 +26,7 @@ class SessionController extends Controller {
         try {
             return UUID.fromString(id)
         }
-        catch(IllegalArgumentException ignored) {
+        catch (IllegalArgumentException ignored) {
             sendErrorResponse(request, new InvalidIdException(id))
             return null
         }
@@ -42,7 +42,7 @@ class SessionController extends Controller {
 
         sessionService.getSession(id).then({ GameSession session ->
             sendJsonResponse(request, session)
-        }, { Exception ex ->
+        }).fail({ Exception ex ->
             sendErrorResponse(request, ex)
         })
     }
@@ -63,7 +63,7 @@ class SessionController extends Controller {
 
         sessionService.finishSession(id).then({ GameSession session ->
             sendJsonResponse(request, session)
-        }, { Exception ex ->
+        }).fail({ Exception ex ->
             sendErrorResponse(request, ex)
         })
     }
@@ -78,7 +78,7 @@ class SessionController extends Controller {
 
         sessionService.deleteSession(id).then({
             sendJsonResponse(request, [:], HttpResponseStatus.NO_CONTENT)
-        }, { Exception ex ->
+        }).fail({ Exception ex ->
             sendErrorResponse(request, ex)
         })
     }

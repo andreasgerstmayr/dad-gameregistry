@@ -23,7 +23,8 @@ class Controller {
         this.loginService = loginService
     }
 
-    protected static void sendJsonResponse(HttpServerRequest request, Object jsonResponse, HttpResponseStatus responseStatus) {
+    protected
+    static void sendJsonResponse(HttpServerRequest request, Object jsonResponse, HttpResponseStatus responseStatus) {
         request.response.putHeader("Content-Type", "application/json")
         request.response.setStatusCode(responseStatus.code())
 
@@ -33,7 +34,8 @@ class Controller {
             request.response.end()
     }
 
-    protected static void sendJsonResponse(HttpServerRequest request, Exception exception, HttpResponseStatus responseStatus) {
+    protected
+    static void sendJsonResponse(HttpServerRequest request, Exception exception, HttpResponseStatus responseStatus) {
         sendJsonResponse(request, ["error": exception.message], responseStatus)
     }
 
@@ -62,7 +64,7 @@ class Controller {
                 authenticatedFunction.call()
             else
                 sendErrorResponse(request, new AuthenticationException())
-        }, { Exception ex ->
+        }).fail({ Exception ex ->
             sendErrorResponse(request, ex)
         })
     }
@@ -82,8 +84,7 @@ class Controller {
                         requireAuthentication(request, {
                             myMethod.invoke(this, request)
                         })
-                    }
-                    else {
+                    } else {
                         // no authentication required
                         myMethod.invoke(this, request)
                     }
