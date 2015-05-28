@@ -1,0 +1,32 @@
+html {
+  font-family: arial, verdana;
+  font-size: 10pt;
+  width: 640px;
+  margin: 0 auto;
+}
+
+:link {
+  text-decoration: underline;
+  color: #040404;
+}
+
+h1 {
+  border-bottom-style: solid;
+  border-color: #000000;
+  border-bottom-width: 2px;
+  padding: 2px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+h2 {
+  margin-top: 10px;
+  border-bottom-style: solid;
+  border-color: #000000;
+  border-bottom-width: 1px;
+}
+
+p {
+  width: 95%;
+  margin-left: 10px;
+}

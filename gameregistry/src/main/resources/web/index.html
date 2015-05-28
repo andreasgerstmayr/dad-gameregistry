@@ -1,5 +1,8 @@
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Language" content="en">
+    <link href="style.css" media="all" rel="stylesheet">
     <title>GameRegistry server - Distributed Systems (us.es) 2014/15</title>
 </head>
 <body>
@@ -8,13 +11,57 @@
     Welcome to the <b>GameRegistry</b> server page! If you are seeing this
     it means the GameRegistry server is up and running.
 </p>
+<h2>What are we</h2>
+<p>
+    The GameRegistry server is part of a distributed system built for a course called
+    <a href="http://www.us.es/esl/estudios/grados/plan_204/asignatura_2040023">Diseño de Aplicaciones Distribuidas</a>
+    from the <a href="https://www.informatica.us.es/">ETSII</a> of Seville's University. It is an information
+    system designed to store game sessions inside the game platform implemented through the course.
+</p>
+<p>
+    More specifically the server stores JSon objects representing Game Sessions into a
+    <a href="https://www.mongodb.org/">MongoDB server</a> and exposes them, all through a
+    <a href="/doc/">RESTful API</a>.
+</p>
+<p>
+    GameRegistry is written in Groovy, uses <a href="http://vertx.io/">Vert.x</a> as the base framework and
+    <a href="https://gradle.org/">Gradle</a> as a build system.
+</p>
+
+
 <h2>Who are we</h2>
-<p>TODO</p>
+<p>
+    GameRegistry is developed by the two members of Group 18 (8:30 every tuesday over the second semester) of the
+    course:
+</p>
+<ul>
+    <li><a href="https://github.com/galvesband">Rafael Gálvez-Cañero</a></li>
+    <li><a href="https://github.com/andihit">Andreas Gerstmayr</a></li>
+</ul>
+<p>
+    To contact us you can follow the
+    <a href="https://github.com/andihit/dad-gameregistry">project's github page</a> and create
+    an <i>issue</i>.
+</p>
 <h2>The code and the repository</h2>
-<p>TODO</p>
+<p>
+    You can download or browse the code from the
+    <a href="https://github.com/andihit/dad-gameregistry">project's github page</a>.
+</p>
 <h2>The REST API and the documentation of the project</h2>
-<p>TODO</p>
+<p>
+    Our server implements a simple REST API to talk to get or return the game sessions
+    the other subsystems send or require from us. You can see the
+    <a href="/doc/">Swagger specification of the GameRegistry API</a> or
+    look into out
+    <a href="https://github.com/andihit/dad-gameregistry/blob/master/memoria/MemoriaGrupo18_main.pdf">Memoir (PDF)</a>.
+</p>
 <h2>Client classes for Vert.x platforms</h2>
-<p>TODO</p>
+<p>
+    In our project code repository we have an example Maven project that makes use of our
+    GameRegistryClient, composed of a few very simple classes that make it easy to access our
+    server from a Vert.x project. You can browse the code
+    <a href="https://github.com/andihit/dad-gameregistry/tree/master/gameregistry-client-example">here</a>.
+</p>
 </body>
 </html>
