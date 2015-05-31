@@ -4,6 +4,7 @@ import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.shared.domain.GameSession
 import es.us.dad.gameregistry.server.repository.ISessionRepository
 import org.vertx.groovy.core.Vertx
+import org.vertx.java.core.json.JsonObject
 import org.vertx.java.core.logging.Logger
 
 class SessionService {
@@ -50,11 +51,12 @@ class SessionService {
      * @param id session id
      * @return updated game session or {@code null} if game session couldn't be found
      */
-    public Promise<GameSession> finishSession(UUID id) {
+    public Promise<GameSession> finishSession(UUID id, Map<String,Object> result) {
         Promise<GameSession> p = new Promise()
 
         sessionRepository.findById(id).then({ GameSession session ->
             session.end = new Date()
+            session.result = result
             return sessionRepository.update(session)
         }).then({ GameSession session ->
             p.fulfill(session)

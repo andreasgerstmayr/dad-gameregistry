@@ -12,19 +12,23 @@ public class GameSession extends DomainObject {
     private String game;
     private Date start;
     private Date end;
+    private Map<String, Object> result;
 
     public GameSession() {
         super();
     }
 
+    // cast from object to Map<String,Object> is unchecked
+    @SuppressWarnings (value="unchecked")
     public GameSession(Map<String, Object> jsonMap) {
         super(jsonMap);
 
         id = UUID.fromString(jsonMap.get("id").toString());
-        user = jsonMap.containsKey("user") ? jsonMap.get("user").toString() : "";
-        game = jsonMap.containsKey("game") ? jsonMap.get("game").toString() : "";
+        user = jsonMap.get("user").toString();
+        game = jsonMap.get("game").toString();
         start = toDate(jsonMap.get("start"));
         end = toDate(jsonMap.get("end"));
+        result = jsonMap.get("result") != null ? (Map<String,Object>)jsonMap.get("result") : null;
     }
 
     @Override
@@ -36,13 +40,14 @@ public class GameSession extends DomainObject {
         json.put("game", game);
         json.put("start", formatDate(start));
         json.put("end", formatDate(end));
+        json.put("result", result);
 
         return json;
     }
 
     @Override
     public String toString() {
-        return String.format("<GameSession #%s: %s/%s, %s - %s>", id, user, game, start, end);
+        return String.format("<GameSession #%s: %s/%s, %s - %s, %s>", id, user, game, start, end, result);
     }
 
     public UUID getId() {
@@ -83,6 +88,14 @@ public class GameSession extends DomainObject {
 
     public void setEnd(Date end) {
         this.end = end;
+    }
+
+    public Map<String, Object> getResult() {
+        return result;
+    }
+
+    public void setResult(Map<String, Object> result) {
+        this.result = result;
     }
 
 }

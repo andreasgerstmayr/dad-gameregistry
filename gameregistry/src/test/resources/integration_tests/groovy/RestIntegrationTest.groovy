@@ -37,7 +37,7 @@ def updateSession(HttpClient client, String id, Closure handler) {
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
-    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end()
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end("""{"result":{"points":1}}""")
 }
 
 def deleteSession(HttpClient client, String id, Closure handler) {
@@ -85,6 +85,7 @@ def testUpdate() {
         updateSession(client, data.getString("id"), { int statusCode2, JsonObject data2 ->
             assertEquals(200, statusCode2)
             assertNotNull(data2.getValue("end"))
+            assertEquals(1, data2.getObject("result").getInteger("points"))
             testComplete()
         })
     })

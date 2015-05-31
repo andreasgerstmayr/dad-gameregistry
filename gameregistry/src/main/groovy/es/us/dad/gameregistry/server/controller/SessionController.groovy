@@ -11,7 +11,9 @@ import es.us.dad.gameregistry.server.util.GET
 import es.us.dad.gameregistry.server.util.POST
 import es.us.dad.gameregistry.server.util.PUT
 import io.netty.handler.codec.http.HttpResponseStatus
+import org.vertx.groovy.core.buffer.Buffer
 import org.vertx.groovy.core.http.HttpServerRequest
+import org.vertx.java.core.json.JsonObject
 
 class SessionController extends Controller {
 
@@ -61,11 +63,16 @@ class SessionController extends Controller {
             return
         }
 
-        sessionService.finishSession(id).then({ GameSession session ->
-            sendJsonResponse(request, session)
-        }).fail({ Exception ex ->
-            sendErrorResponse(request, ex)
-        })
+        request.bodyHandler { Buffer buffer ->
+            JsonObject data = new JsonObject(buffer.toString())
+            JsonObject result = data.getObject("result")
+            Map<String,Object> resultMap = result != null ? result.toMap() : null
+            sessionService.finishSession(id, resultMap).then({ GameSession session ->
+                sendJsonResponse(request, session)
+            }).fail({ Exception ex ->
+                sendErrorResponse(request, ex)
+            })
+        }
     }
 
     @Authenticated

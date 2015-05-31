@@ -17,7 +17,7 @@ def testCleanup() {
     SessionService sessionService = new SessionService(vertx, container.logger, sessionRepository)
 
     sessionService.startSession("testUser", "testGame").then({ GameSession gameSession ->
-        return sessionService.finishSession(gameSession.id)
+        return sessionService.finishSession(gameSession.id, null)
     }).then({
         return sessionService.startSession("testUser2", "testGame2")
     }).then({ GameSession gameSession ->
