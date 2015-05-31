@@ -15,6 +15,7 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.Vertx;
 
 import java.net.*;
+import java.util.Map;
 import java.util.UUID;
 
 import com.hazelcast.util.AddressUtil.InvalidAddressException;
@@ -373,21 +374,22 @@ public class GameRegistryClient {
 	
 	// PUT /session/:session.id
 	/**
-	 * Replaces a GameSession in the GameRegistryServer with a new one.
+	 * Marks a GameSession as finished and stores the game result.
 	 * 
 	 * The GameRegistry server will find a session with an identifier equal to the
-	 * session provided to this method and replace that session with the new one.
+	 * session provided to this method, marks the session as finished and stores the game result.
 	 * 
-	 * @param session The new version of the GameSession to be replaced. 
+	 * @param sessionId Identifier of the session to be updated.
+	 * @param result Result of the game. Arbitrary JSON object, e.g. {"points": 10}
 	 * @param responseHandler Handler that will receive the response.
 	 * @return This client (fluent interface).
 	 */
-	public GameRegistryClient updateSession(GameSession session, Handler<GameRegistryResponse> responseHandler) {
-		String url = basepath + "/sessions/" + session.getId();
+	public GameRegistryClient finishSession(UUID sessionId, Map<String, Object> result, Handler<GameRegistryResponse> responseHandler) {
+		String url = basepath + "/sessions/" + sessionId;
 		HttpClientRequest req = createHttpRequest(url, "PUT", responseHandler);
 		req.headers().set("Content-Type", "application/json");
-		req.end(new JsonObject(session.toJsonMap()).toString());
-		
+		req.end(new JsonObject(result).toString());
+
 		return this;
 	}
 	

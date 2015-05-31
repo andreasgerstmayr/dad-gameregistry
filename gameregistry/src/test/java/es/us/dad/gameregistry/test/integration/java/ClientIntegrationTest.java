@@ -10,6 +10,8 @@ import org.vertx.testtools.TestVerticle;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.vertx.testtools.VertxAssert.*;
@@ -290,11 +292,14 @@ public class ClientIntegrationTest extends TestVerticle {
             // there is no end date because the game is running at the moment
             assertNull(createdSession.getEnd());
 
-            // now the user finishes the game
-            createdSession.setEnd(new Date());
-            client.updateSession(createdSession, event2 -> {
+            // the game result
+            Map<String,Object> gameResult = new HashMap<String,Object>();
+            gameResult.put("points", 10);
+
+            client.finishSession(createdSession.getId(), gameResult, event2 -> {
                 assertEquals(ResponseType.OK, event2.responseType);
                 assertNotNull(event2.sessions[0].getEnd());
+                assertEquals(10, event2.sessions[0].getResult().get("points"));
                 testComplete();
             });
         });

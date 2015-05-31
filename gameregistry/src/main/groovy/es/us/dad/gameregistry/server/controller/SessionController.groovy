@@ -57,7 +57,7 @@ class SessionController extends Controller {
 
     @Authenticated
     @PUT("/api/v1/sessions/:id")
-    public void changeSession(HttpServerRequest request) {
+    public void finishSession(HttpServerRequest request) {
         UUID id = convertIdOrSendError(request, request.params.get("id"))
         if (id == null) {
             return

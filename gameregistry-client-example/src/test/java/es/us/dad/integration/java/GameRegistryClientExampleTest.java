@@ -15,6 +15,8 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.vertx.testtools.VertxAssert.*;
 
@@ -42,11 +44,12 @@ public class GameRegistryClientExampleTest extends TestVerticle {
     }
 
     private void finishGame(final GameRegistryClient client, final String user, final String token, GameSession session) {
-        // now the user has finished the game
-        session.setEnd(new Date());
+        // store game result
+        Map<String,Object> gameResult = new HashMap<String,Object>();
+        gameResult.put("points", 10);
 
         client.setUser(user).setToken(token);
-        client.updateSession(session, new Handler<GameRegistryResponse>() {
+        client.finishSession(session.getId(), gameResult, new Handler<GameRegistryResponse>() {
 
             @Override
             public void handle(GameRegistryResponse event) {

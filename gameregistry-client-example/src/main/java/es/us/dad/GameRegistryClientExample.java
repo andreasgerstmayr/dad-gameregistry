@@ -9,15 +9,18 @@ import org.vertx.java.platform.Verticle;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GameRegistryClientExample extends Verticle {
     private void finishGame(GameRegistryClient client, String user, String token, GameSession session) {
-        // now the user has finished the game
-        session.setEnd(new Date());
+        // store game result
+        Map<String,Object> gameResult = new HashMap<String,Object>();
+        gameResult.put("points", 10);
 
         client.setUser(user).setToken(token);
         container.logger().info("update game session...");
-        client.updateSession(session, new Handler<GameRegistryResponse>() {
+        client.finishSession(session.getId(), gameResult, new Handler<GameRegistryResponse>() {
 
             @Override
             public void handle(GameRegistryResponse event) {
