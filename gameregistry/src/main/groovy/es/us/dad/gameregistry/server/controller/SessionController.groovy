@@ -63,15 +63,14 @@ class SessionController extends Controller {
             return
         }
 
-        request.bodyHandler { Buffer buffer ->
-            JsonObject result = new JsonObject(buffer.toString())
-            Map<String,Object> resultMap = result != null ? result.toMap() : null
-            sessionService.finishSession(id, resultMap).then({ GameSession session ->
-                sendJsonResponse(request, session)
-            }).fail({ Exception ex ->
-                sendErrorResponse(request, ex)
-            })
-        }
+        getRequestBody(request).then({ JsonObject body ->
+            Map<String, Object> resultMap = body != null ? body.toMap() : null
+            return sessionService.finishSession(id, resultMap)
+        }).then({ GameSession session ->
+            sendJsonResponse(request, session)
+        }).fail({ Exception ex ->
+            sendErrorResponse(request, ex)
+        })
     }
 
     @Authenticated

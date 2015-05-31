@@ -35,16 +35,15 @@ class SessionsController extends Controller {
     @POST("/api/v1/sessions")
     public void createSession(HttpServerRequest request) {
         String user = request.headers.get(GameRegistryConstants.GAMEREGISTRY_USER_HEADER)
-        request.bodyHandler { Buffer buffer ->
-            JsonObject data = new JsonObject(buffer.toString())
 
-            String game = data.getString("game")
-            sessionService.startSession(user, game).then({ GameSession newSession ->
-                sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
-            }).fail({ Exception ex ->
-                sendErrorResponse(request, ex)
-            })
-        }
+        getRequestBody(request).then({ JsonObject body ->
+            String game = body.getString("game")
+            return sessionService.startSession(user, game)
+        }).then({ GameSession newSession ->
+            sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
+        }).fail({ Exception ex ->
+            sendErrorResponse(request, ex)
+        })
     }
 
     @PUT("/api/v1/sessions")

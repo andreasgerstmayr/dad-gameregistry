@@ -103,6 +103,9 @@
             "schema": {
               "$ref": "#/definitions/GameSession"
             }
+          },
+          "400": {
+            "description": "The request body is invalid JSON."
           }
         }
       }
@@ -143,6 +146,9 @@
             "schema": {
               "$ref": "#/definitions/GameSession"
             }
+          },
+          "400": {
+            "description": "The game session id is not a valid UUID."
           }
         }
       },
@@ -191,6 +197,9 @@
               "$ref": "#/definitions/GameSession"
             }
           },
+          "400": {
+            "description": "The game session is not a valid UUID or the request body is invalid JSON."
+          },
           "404": {
             "description": "If the game session was not found."
           }
@@ -228,6 +237,9 @@
         "responses": {
           "204": {
             "description": "The game session was removed."
+          },
+          "400": {
+            "description": "The game session id is not a valid UUID."
           },
           "404": {
             "description": "No game session with the given 'id' has been found."

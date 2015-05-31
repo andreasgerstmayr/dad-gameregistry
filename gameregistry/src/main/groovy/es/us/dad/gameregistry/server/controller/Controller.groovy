@@ -1,16 +1,20 @@
 package es.us.dad.gameregistry.server.controller
 
 import com.darylteo.vertx.promises.groovy.Promise
-import es.us.dad.gameregistry.shared.domain.DomainObject
 import es.us.dad.gameregistry.server.exception.AuthenticationException
+import es.us.dad.gameregistry.server.exception.InvalidJsonBodyException
 import es.us.dad.gameregistry.server.exception.RestException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.util.*
 import es.us.dad.gameregistry.shared.GameRegistryConstants
+import es.us.dad.gameregistry.shared.domain.DomainObject
 import groovy.json.JsonOutput
 import io.netty.handler.codec.http.HttpResponseStatus
+import org.vertx.groovy.core.buffer.Buffer
 import org.vertx.groovy.core.http.HttpServerRequest
 import org.vertx.groovy.core.http.RouteMatcher
+import org.vertx.java.core.json.DecodeException
+import org.vertx.java.core.json.JsonObject
 
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
@@ -72,6 +76,22 @@ class Controller {
         }).fail({ Exception ex ->
             sendErrorResponse(request, ex)
         })
+    }
+
+    protected Promise<JsonObject> getRequestBody(HttpServerRequest request) {
+        Promise<JsonObject> p = new Promise<JsonObject>()
+
+        request.bodyHandler { Buffer buffer ->
+            try {
+                JsonObject body = new JsonObject(buffer.toString())
+                p.fulfill(body)
+            }
+            catch(DecodeException ignored) {
+                p.reject(new InvalidJsonBodyException())
+            }
+        }
+
+        return p
     }
 
     public void registerUrls(RouteMatcher routeMatcher) {
