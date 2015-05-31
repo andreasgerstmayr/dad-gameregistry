@@ -19,14 +19,13 @@
     "/sessions": {
       "get": {
         "summary": "Returns a collection of game sessions.",
-        "description": "This resource represents the collection of game sessions. It accepts query arguments for filtering (not implemented or defined as of yet, waiting for the games groups to 'express' their needs).",
+        "description": "This resource represents the collection of game sessions. It also accepts query arguments for filtering.",
         "parameters": [
           {
             "name": "gameregistry-user",
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The used identifier used in the Login Server."
           },
           {
@@ -34,7 +33,6 @@
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The token related to the user specified in 'gameregistry-user'."
           },
           {
@@ -42,24 +40,7 @@
             "in": "query",
             "required": false,
             "type": "string",
-            "format": "string",
-            "description": "Example filter parameter. TODO."
-          },
-          {
-            "name": "start",
-            "in": "query",
-            "required": false,
-            "type": "number",
-            "format": "date",
-            "description": "Example filter parameter. TODO."
-          },
-          {
-            "name": "end",
-            "in": "query",
-            "required": false,
-            "type": "number",
-            "format": "date",
-            "description": "Example filter parameter. TODO."
+            "description": "If specified, retrieve only GameSessions of this user"
           }
         ],
         "tags": [
@@ -86,7 +67,6 @@
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The used identifier used in the Login Server."
           },
           {
@@ -94,16 +74,23 @@
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The token related to the user specified in 'gameregistry-user'."
           },
           {
-            "name": "game session",
+            "name": "game information",
             "in": "body",
             "required": true,
-            "description": "The game session to add to the system.",
+            "description": "The game name.",
             "schema": {
-              "$ref": "#/definitions/GameSession"
+              "type": "object",
+              "required": [
+                "game"
+              ],
+              "properties": {
+                "game": {
+                  "type": "string"
+                }
+              }
             }
           }
         ],
@@ -129,7 +116,6 @@
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The used identifier used in the Login Server."
           },
           {
@@ -137,7 +123,6 @@
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The token related to the user specified in 'gameregistry-user'."
           },
           {
@@ -145,7 +130,7 @@
             "in": "path",
             "description": "The game session identifier.",
             "required": true,
-            "type": "number",
+            "type": "string",
             "format": "uuid"
           }
         ],
@@ -162,14 +147,13 @@
         }
       },
       "put": {
-        "summary": "Replaces the game session identified by 'id' with the included game session.",
+        "summary": "Marks the GameSession as finished and stores the game result.",
         "parameters": [
           {
             "name": "gameregistry-user",
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The used identifier used in the Login Server."
           },
           {
@@ -177,7 +161,6 @@
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The token related to the user specified in 'gameregistry-user'."
           },
           {
@@ -185,8 +168,17 @@
             "in": "path",
             "description": "The game session identifier.",
             "required": true,
-            "type": "number",
+            "type": "string",
             "format": "uuid"
+          },
+          {
+            "name": "result",
+            "in": "body",
+            "required": false,
+            "description": "The result of the game session.",
+            "schema": {
+              "type": "object"
+            }
           }
         ],
         "tags": [
@@ -194,7 +186,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The game session was replaced.",
+            "description": "The game session was updated.",
             "schema": {
               "$ref": "#/definitions/GameSession"
             }
@@ -212,7 +204,6 @@
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The used identifier used in the Login Server."
           },
           {
@@ -220,7 +211,6 @@
             "in": "header",
             "required": true,
             "type": "string",
-            "format": "string",
             "description": "The token related to the user specified in 'gameregistry-user'."
           },
           {
@@ -228,7 +218,7 @@
             "in": "path",
             "description": "The game session identifier.",
             "required": true,
-            "type": "number",
+            "type": "string",
             "format": "uuid"
           }
         ],
@@ -251,6 +241,7 @@
       "properties": {
         "id": {
           "type": "string",
+          "format": "uuid",
           "description": "an UUID that uniquely identifies the game session."
         },
         "user": {
@@ -263,11 +254,17 @@
         },
         "start": {
           "type": "string",
+          "format": "date",
           "description": "Start date of the game session."
         },
         "end": {
           "type": "string",
+          "format": "date",
           "description": "End date of the game session."
+        },
+        "result": {
+          "type": "object",
+          "description": "The result of the game session."
         }
       }
     }

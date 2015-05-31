@@ -35,6 +35,11 @@ class Controller {
     }
 
     protected
+    static void sendJsonResponse(HttpServerRequest request, DomainObject jsonResponse, HttpResponseStatus responseStatus) {
+        sendJsonResponse(request, jsonResponse?.toJsonMap(), responseStatus)
+    }
+
+    protected
     static void sendJsonResponse(HttpServerRequest request, Exception exception, HttpResponseStatus responseStatus) {
         sendJsonResponse(request, ["error": exception.message], responseStatus)
     }

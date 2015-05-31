@@ -37,7 +37,7 @@ def updateSession(HttpClient client, String id, Closure handler) {
         resp.bodyHandler { Buffer content ->
             handler.call(resp.statusCode, jsonOrNull(content))
         }
-    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end("""{"result":{"points":1}}""")
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end("""{"points":1}""")
 }
 
 def deleteSession(HttpClient client, String id, Closure handler) {
