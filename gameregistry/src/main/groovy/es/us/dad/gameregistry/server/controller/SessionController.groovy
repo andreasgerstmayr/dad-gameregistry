@@ -1,6 +1,6 @@
 package es.us.dad.gameregistry.server.controller
 
-import es.us.dad.gameregistry.server.exception.InvalidIdException
+import es.us.dad.gameregistry.server.exception.BadRequestException
 import es.us.dad.gameregistry.server.exception.MethodNotAllowedException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.service.SessionService
@@ -24,7 +24,7 @@ class SessionController extends Controller {
             return UUID.fromString(id)
         }
         catch (IllegalArgumentException ignored) {
-            sendErrorResponse(request, new InvalidIdException(id))
+            sendErrorResponse(request, new BadRequestException("The id: '" + id + "' is not valid."))
             return null
         }
     }

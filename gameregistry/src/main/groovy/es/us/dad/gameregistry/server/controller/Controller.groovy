@@ -2,7 +2,7 @@ package es.us.dad.gameregistry.server.controller
 
 import com.darylteo.vertx.promises.groovy.Promise
 import es.us.dad.gameregistry.server.exception.AuthenticationException
-import es.us.dad.gameregistry.server.exception.InvalidJsonBodyException
+import es.us.dad.gameregistry.server.exception.BadRequestException
 import es.us.dad.gameregistry.server.exception.RestException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.util.*
@@ -63,11 +63,11 @@ class Controller {
             sendJsonResponse(request, ex, HttpResponseStatus.INTERNAL_SERVER_ERROR)
     }
 
-    protected String getCurrentUser(HttpServerRequest request) {
+    protected static String getCurrentUser(HttpServerRequest request) {
         return request.headers.get(GameRegistryConstants.GAMEREGISTRY_USER_HEADER)
     }
 
-    protected String getCurrentToken(HttpServerRequest request) {
+    protected static String getCurrentToken(HttpServerRequest request) {
         return request.headers.get(GameRegistryConstants.GAMEREGISTRY_TOKEN_HEADER)
     }
 
@@ -86,7 +86,7 @@ class Controller {
         })
     }
 
-    protected Promise<JsonObject> getRequestBody(HttpServerRequest request) {
+    protected static Promise<JsonObject> getRequestBody(HttpServerRequest request) {
         Promise<JsonObject> p = new Promise<JsonObject>()
 
         request.bodyHandler { Buffer buffer ->
@@ -95,7 +95,7 @@ class Controller {
                 p.fulfill(body)
             }
             catch(DecodeException ignored) {
-                p.reject(new InvalidJsonBodyException())
+                p.reject(new BadRequestException("The supplied request body is not valid JSON."))
             }
         }
 

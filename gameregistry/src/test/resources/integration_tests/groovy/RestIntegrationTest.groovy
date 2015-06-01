@@ -131,6 +131,28 @@ def testNotAuthenticated() {
     }).end()
 }
 
+def testNoGameTitle() {
+    HttpClient client = vertx.createHttpClient().setPort(8080)
+    client.post("/api/v1/sessions", { HttpClientResponse resp ->
+        resp.bodyHandler { Buffer content ->
+            assertEquals(400, resp.statusCode)
+            assertTrue(content.toString().contains("The game name is missing in the request body."))
+            testComplete()
+        }
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end("{}")
+}
+
+def testInvalidJson() {
+    HttpClient client = vertx.createHttpClient().setPort(8080)
+    client.post("/api/v1/sessions", { HttpClientResponse resp ->
+        resp.bodyHandler { Buffer content ->
+            assertEquals(400, resp.statusCode)
+            assertEquals("""{"error":"The supplied request body is not valid JSON."}""", content.toString())
+            testComplete()
+        }
+    }).putHeader("gameregistry-user", "testuser").putHeader("gameregistry-token", "testtoken").end("""{"test-game"}""")
+}
+
 def clearDatabase(Closure callback) {
     vertx.eventBus.send("gameregistry.db", [action: "drop_collection",
                                             collection: "game_session"]) { Message message ->

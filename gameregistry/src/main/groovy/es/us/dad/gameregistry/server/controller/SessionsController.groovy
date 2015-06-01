@@ -1,13 +1,13 @@
 package es.us.dad.gameregistry.server.controller
 
-import es.us.dad.gameregistry.shared.GameRegistryConstants
+import com.hazelcast.util.StringUtil
+import es.us.dad.gameregistry.server.exception.BadRequestException
 import es.us.dad.gameregistry.shared.domain.GameSession
 import es.us.dad.gameregistry.server.exception.MethodNotAllowedException
 import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.service.SessionService
 import es.us.dad.gameregistry.server.util.*
 import io.netty.handler.codec.http.HttpResponseStatus
-import org.vertx.groovy.core.buffer.Buffer
 import org.vertx.groovy.core.http.HttpServerRequest
 import org.vertx.java.core.json.JsonObject
 
@@ -38,6 +38,8 @@ class SessionsController extends Controller {
 
         getRequestBody(request).then({ JsonObject body ->
             String game = body.getString("game")
+            if (game == null || game.isEmpty())
+                throw new BadRequestException("""The game name is missing in the request body. Please supply a JSON in the request body, ex. {"game": "test game"}""")
             return sessionService.startSession(user, game)
         }).then({ GameSession newSession ->
             sendJsonResponse(request, newSession, HttpResponseStatus.CREATED)
