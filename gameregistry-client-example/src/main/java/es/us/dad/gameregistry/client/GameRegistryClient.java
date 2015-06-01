@@ -297,15 +297,20 @@ public class GameRegistryClient {
 	/**
 	 * Requests a collection of GameSessions from the GameRegistry server.
 	 * 
-	 * @param filterParams Filtering options.
+	 * @param filterParams Filtering options (available options: user).
 	 * @param responseHandler The handler that will process the response.
 	 * @return This client (fluent interface).
 	 */
-	public GameRegistryClient getSessions(Object filterParams, Handler<GameRegistryResponse> responseHandler) {
+	public GameRegistryClient getSessions(Map<String,String> filterParams, Handler<GameRegistryResponse> responseHandler) {
 		// TODO filterParams needs the protocol to be defined to be more specific
 		String url = basepath + "/sessions";
 		HttpClientRequest req = createHttpRequest(url, "GET", responseHandler);
-		// TODO Add filtering parameters
+
+		if (filterParams != null) {
+			for (Map.Entry<String, String> entry : filterParams.entrySet()) {
+				req.putHeader(entry.getKey(), entry.getValue());
+			}
+		}
 		
 		req.end();
 		
@@ -315,23 +320,14 @@ public class GameRegistryClient {
 	// POST /sessions
 	/**
 	 * Adds a new session to the GameRegistry server.
-	 * 
-	 * The session to be added will get a new identifier when added to the server.
-	 * The previous session id will be ignored.
-	 * 
-	 * The response will contain the new game session with its new UUID.
+	 *
+	 * The response will contain the created game session with its new UUID.
 	 * 
 	 * Intended use:
 	 * <pre><code>
 	 *  GameRegistryClient client = new GameRegistryClient("1.2.3.4", "8080");
 	 *  
-	 *  GameSession newSession = new GameSession();
-	 *  newSession.game = "MyFunnyGame";
-	 *  newSession.start = new Date(...);
-	 *  newSession.end = new Date(...);
-	 *  newSession.user = userId;
-	 *  
-	 *  client.addSession(session, new Handler&lt;GameRegistryResponse&gt;() {
+	 *  client.addSession("MyFunnyGame", new Handler&lt;GameRegistryResponse&gt;() {
 	 *    &#64;Override
 	 *    void handle(GameRegistryResponse response) {
 	 *      // Add here code to handle the response (check response.responseType, etc)
@@ -339,20 +335,18 @@ public class GameRegistryClient {
 	 *  });
 	 * </code></pre>
 	 * 
-	 * @param session Session to add.
+	 * @param game game name
 	 * @param responseHandler A handler for the server's response.
 	 * @return This client (fluent interface).
 	 */
-	public GameRegistryClient addSession(GameSession session, Handler<GameRegistryResponse> responseHandler) {
+	public GameRegistryClient addSession(String game, Handler<GameRegistryResponse> responseHandler) {
 		String url = basepath + "/sessions";
 		HttpClientRequest req = createHttpRequest(url, "POST", responseHandler);
 		req.headers().set("Content-Type", "application/json");
 
-		// The JsonObject sent to the server should not contain an id, it will get
-		// a new id when added to the collection.
-		JsonObject jsonSession = new JsonObject(session.toJsonMap());
-		jsonSession.removeField("id");
-		req.end(jsonSession.encodePrettily());
+		JsonObject jsonBody = new JsonObject();
+		jsonBody.putString("game", game);
+		req.end(jsonBody.encodePrettily());
 		
 		return this;
 	}

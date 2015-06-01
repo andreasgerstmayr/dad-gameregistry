@@ -162,13 +162,7 @@ public class ClientIntegrationTest extends TestVerticle {
         client.setUser("testUser");
         client.setToken("test");
         
-        final GameSession session = new GameSession();
-        session.setStart(new Date());
-        session.setEnd(new Date(session.getStart().getTime() + 1000*60*10)); // Ten minutes after start
-        session.setGame("testGame");
-        //session.setUser("testUser");
-        
-        client.addSession(session, event -> {
+        client.addSession("testGame", event -> {
             assertEquals(ResponseType.OK, event.responseType);
             assertNotNull(event.sessions);
             assertEquals(1, event.sessions.length);
@@ -185,14 +179,8 @@ public class ClientIntegrationTest extends TestVerticle {
     		.setUser("testUser")
     		.setToken("test");
 
-        // Create a sesion
-        final GameSession session = new GameSession();
-        session.setStart(new Date());
-        session.setEnd(new Date(session.getStart().getTime() + 1000 * 60 * 10)); // Ten minutes after start
-        session.setGame("testGame");
-
         // Add the session
-        client.addSession(session, event -> {
+        client.addSession("testGame", event -> {
             // And ask the server for a session with the id of the added session
             assertEquals(ResponseType.OK, event.responseType);
             assertEquals(1, event.sessions.length);
@@ -233,14 +221,8 @@ public class ClientIntegrationTest extends TestVerticle {
                 .setUser("testUser")
                 .setToken("test");
 
-        // Create a sesion
-        final GameSession session = new GameSession();
-        session.setStart(new Date());
-        session.setEnd(new Date(session.getStart().getTime() + 1000 * 60 * 10)); // Ten minutes after start
-        session.setGame("testGame");
-
         // Add the session
-        client.addSession(session, event -> {
+        client.addSession("testGame", event -> {
             // And ask the server for a session with the id of the added session
             assertEquals(ResponseType.OK, event.responseType);
             assertEquals(1, event.sessions.length);
@@ -277,12 +259,7 @@ public class ClientIntegrationTest extends TestVerticle {
         // user 'testUser' with token 'testToken' starts game 'testGame':
         client.setUser("testUser").setToken("testToken");
 
-        GameSession session = new GameSession();
-        session.setStart(new Date());
-        session.setGame("testGame");
-
-
-        client.addSession(session, event -> {
+        client.addSession("testGame", event -> {
             assertEquals(ResponseType.OK, event.responseType);
             assertEquals(1, event.sessions.length);
 

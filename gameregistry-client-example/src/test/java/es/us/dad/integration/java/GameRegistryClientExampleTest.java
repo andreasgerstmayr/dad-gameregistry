@@ -64,12 +64,8 @@ public class GameRegistryClientExampleTest extends TestVerticle {
     }
 
     private void startGame(final GameRegistryClient client, final String user, final String token) {
-        GameSession session = new GameSession();
-        session.setStart(new Date());
-        session.setGame("testGame");
-
         client.setUser(user).setToken(token);
-        client.addSession(session, new Handler<GameRegistryResponse>() {
+        client.addSession("testGame", new Handler<GameRegistryResponse>() {
             @Override
             public void handle(GameRegistryResponse event) {
                 assertEquals(GameRegistryResponse.ResponseType.OK, event.responseType);
