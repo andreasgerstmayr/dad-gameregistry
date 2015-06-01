@@ -2,7 +2,7 @@ package es.us.dad.gameregistry.server.exception
 
 import io.netty.handler.codec.http.HttpResponseStatus
 
-class RestException extends Exception {
+class RestException extends RuntimeException {
 
     private final HttpResponseStatus responseStatus
 

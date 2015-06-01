@@ -34,7 +34,7 @@ class SessionsController extends Controller {
     @Authenticated
     @POST("/api/v1/sessions")
     public void createSession(HttpServerRequest request) {
-        String user = request.headers.get(GameRegistryConstants.GAMEREGISTRY_USER_HEADER)
+        String user = getCurrentUser(request)
 
         getRequestBody(request).then({ JsonObject body ->
             String game = body.getString("game")

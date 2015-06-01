@@ -1,6 +1,7 @@
 package integration_tests.groovy
 
 import com.darylteo.vertx.promises.groovy.Promise
+import es.us.dad.gameregistry.server.exception.ForbiddenException
 import es.us.dad.gameregistry.server.repository.ISessionRepository
 import es.us.dad.gameregistry.server.repository.MongoSessionRepository
 import es.us.dad.gameregistry.server.service.SessionService
@@ -17,7 +18,7 @@ def testCleanup() {
     SessionService sessionService = new SessionService(vertx, container.logger, sessionRepository)
 
     sessionService.startSession("testUser", "testGame").then({ GameSession gameSession ->
-        return sessionService.finishSession(gameSession.id, null)
+        return sessionService.finishSession("testUser", gameSession.id, null)
     }).then({
         return sessionService.startSession("testUser2", "testGame2")
     }).then({ GameSession gameSession ->
@@ -50,6 +51,34 @@ def testCleanup() {
     }).fail({ Exception ex ->
         container.logger.info("Error: " + ex)
         assertTrue(false)
+    })
+}
+
+def testForbiddenFinish() {
+    ISessionRepository sessionRepository = new MongoSessionRepository(vertx, container.logger)
+    SessionService sessionService = new SessionService(vertx, container.logger, sessionRepository)
+
+    sessionService.startSession("testUser", "testGame").then({ GameSession gameSession ->
+        return sessionService.finishSession("testUser2", gameSession.id, null)
+    }).then({
+        assertTrue("should not be reached", false)
+    }).fail({ Exception ex ->
+        assertEquals(ForbiddenException.class, ex.getClass())
+        testComplete()
+    })
+}
+
+def testForbiddenDelete() {
+    ISessionRepository sessionRepository = new MongoSessionRepository(vertx, container.logger)
+    SessionService sessionService = new SessionService(vertx, container.logger, sessionRepository)
+
+    sessionService.startSession("testUser", "testGame").then({ GameSession gameSession ->
+        return sessionService.deleteSession("testUser2", gameSession.id)
+    }).then({
+        assertTrue("should not be reached", false)
+    }).fail({ Exception ex ->
+        assertEquals(ForbiddenException.class, ex.getClass())
+        testComplete()
     })
 }
 

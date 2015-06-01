@@ -1,6 +1,7 @@
 package es.us.dad.gameregistry.server.service
 
 import com.darylteo.vertx.promises.groovy.Promise
+import es.us.dad.gameregistry.server.exception.ForbiddenException
 import es.us.dad.gameregistry.shared.domain.GameSession
 import es.us.dad.gameregistry.server.repository.ISessionRepository
 import org.vertx.groovy.core.Vertx
@@ -48,32 +49,51 @@ class SessionService {
 
     /**
      * finishes a game session: sets end date
+     * @param user current user
      * @param id session id
      * @return updated game session or {@code null} if game session couldn't be found
      */
-    public Promise<GameSession> finishSession(UUID id, Map<String,Object> result) {
+    public Promise<GameSession> finishSession(String user, UUID id, Map<String,Object> result) {
         Promise<GameSession> p = new Promise()
 
         sessionRepository.findById(id).then({ GameSession session ->
+            if (!session.user.equals(user))
+                throw new ForbiddenException("Only the creator of the GameSession can mark the GameSession as finished.")
+
             session.end = new Date()
             session.result = result
             return sessionRepository.update(session)
         }).then({ GameSession session ->
             p.fulfill(session)
-        }).then({ Exception ex ->
+        }).fail({ Exception ex ->
             p.reject(ex)
         })
+        // last 2 closures shouldn't be necessary, but there is some problem with the generic type of the Promise.
 
         return p
     }
 
     /**
      * deletes a game session
+     * @param user current user
      * @param id session id
      * @return true if the session is found and deleted, false otherwise
      */
-    public Promise<Void> deleteSession(UUID id) {
-        return sessionRepository.delete(id)
+    public Promise<Void> deleteSession(String user, UUID id) {
+        Promise<Void> p = new Promise()
+
+        sessionRepository.findById(id).then({ GameSession session ->
+            if (!session.user.equals(user))
+                throw new ForbiddenException("Only the creator of the GameSession can delete the GameSession.")
+            return sessionRepository.delete(id)
+        }).then({
+            p.fulfill(null)
+        }).fail({ Exception ex ->
+            p.reject(ex)
+        })
+        // last 2 closures shouldn't be necessary, but there is some problem with the generic type of the Promise.
+
+        return p
     }
 
     /**

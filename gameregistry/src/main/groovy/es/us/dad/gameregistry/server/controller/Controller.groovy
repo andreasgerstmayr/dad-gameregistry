@@ -63,9 +63,17 @@ class Controller {
             sendJsonResponse(request, ex, HttpResponseStatus.INTERNAL_SERVER_ERROR)
     }
 
+    protected String getCurrentUser(HttpServerRequest request) {
+        return request.headers.get(GameRegistryConstants.GAMEREGISTRY_USER_HEADER)
+    }
+
+    protected String getCurrentToken(HttpServerRequest request) {
+        return request.headers.get(GameRegistryConstants.GAMEREGISTRY_TOKEN_HEADER)
+    }
+
     protected void requireAuthentication(HttpServerRequest request, Closure authenticatedFunction) {
-        String user = request.headers.get(GameRegistryConstants.GAMEREGISTRY_USER_HEADER)
-        String token = request.headers.get(GameRegistryConstants.GAMEREGISTRY_USER_HEADER)
+        String user = getCurrentUser(request)
+        String token = getCurrentToken(request)
 
         Promise<Boolean> authenticated = loginService.isAuthenticated(user, token)
         authenticated.then({ boolean isAuthenticated ->
