@@ -1,16 +1,18 @@
 package es.us.dad.gameregistry.server.controller
 
+import es.us.dad.gameregistry.server.service.ILoginService
 import es.us.dad.gameregistry.server.service.StaticFilesService
 import org.vertx.groovy.core.http.HttpServerRequest
 import org.vertx.groovy.core.http.RouteMatcher
 import org.vertx.java.core.logging.Logger
 
-class StaticFilesController {
+class StaticFilesController extends Controller {
     final private StaticFilesService fileService
     final private String base_path
     final private Logger logger
 
-    public StaticFilesController(String base_path, StaticFilesService fileService, Logger logger) {
+    public StaticFilesController(ILoginService loginService, StaticFilesService fileService, Logger logger, String base_path) {
+        super(loginService)
         this.fileService = fileService
         this.logger = logger
 

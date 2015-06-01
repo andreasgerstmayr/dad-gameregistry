@@ -49,7 +49,7 @@ class RestServer extends Verticle {
         // The StaticFilesController should be the last registered controller becouse regular
         // expressions and might be bound to '/', catching any request even if a more specific
         // route exists (but was registered afterward).
-        new StaticFilesController(staticWebBasePath, fileService, container.logger).registerUrls(rm)
+        new StaticFilesController(loginService, fileService, container.logger, staticWebBasePath).registerUrls(rm)
 
         // start periodic cleanup task
         vertx.setPeriodic(cleanup_interval * 1000, {
