@@ -201,6 +201,34 @@ public class ClientIntegrationTest extends TestVerticle {
     }
 
     @Test
+    public void testClientGetSessions() throws UnknownHostException {
+        GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx)
+                .setUser("testUser1")
+                .setToken("test");
+
+        client.addSession("testGame1", event -> {
+            assertEquals(ResponseType.OK, event.responseType);
+            assertEquals(1, event.sessions.length);
+
+            client.setUser("testUser2");
+            client.addSession("testGame2", event2 -> {
+                assertEquals(ResponseType.OK, event.responseType);
+                assertEquals(1, event.sessions.length);
+
+                Map<String,String> filterParams = new HashMap<String, String>();
+                filterParams.put("user", "testUser1");
+                client.getSessions(filterParams, event3 -> {
+                    assertEquals(ResponseType.OK, event2.responseType);
+                    assertEquals(1, event3.sessions.length);
+                    assertEquals("testGame1", event3.sessions[0].getGame());
+
+                    testComplete();
+                });
+            });
+        });
+    }
+
+    @Test
     public void testClientGetSessionNotFound() throws UnknownHostException {
         GameRegistryClient client = new GameRegistryClient(InetAddress.getLocalHost(), vertx)
                 .setUser("testUser")

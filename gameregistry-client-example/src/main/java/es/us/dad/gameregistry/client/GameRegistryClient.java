@@ -1,9 +1,10 @@
 package es.us.dad.gameregistry.client;
 
+import com.hazelcast.util.AddressUtil.InvalidAddressException;
 import es.us.dad.gameregistry.shared.GameRegistryConstants;
-import es.us.dad.gameregistry.shared.domain.GameSession;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.Vertx;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.dns.DnsClient;
 import org.vertx.java.core.dns.DnsException;
@@ -12,13 +13,14 @@ import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientRequest;
 import org.vertx.java.core.http.HttpClientResponse;
 import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.core.Vertx;
 
-import java.net.*;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.UUID;
-
-import com.hazelcast.util.AddressUtil.InvalidAddressException;
 
 /**
  * Helper class to execute requests on a GameRegistry server.
@@ -302,16 +304,25 @@ public class GameRegistryClient {
 	 * @return This client (fluent interface).
 	 */
 	public GameRegistryClient getSessions(Map<String,String> filterParams, Handler<GameRegistryResponse> responseHandler) {
-		// TODO filterParams needs the protocol to be defined to be more specific
 		String url = basepath + "/sessions";
-		HttpClientRequest req = createHttpRequest(url, "GET", responseHandler);
-
-		if (filterParams != null) {
+		if (filterParams != null && !filterParams.isEmpty()) {
+			boolean isFirst = true;
 			for (Map.Entry<String, String> entry : filterParams.entrySet()) {
-				req.putHeader(entry.getKey(), entry.getValue());
+				if (isFirst)
+					url += "?";
+				else
+					url += "&";
+
+				try {
+					url += entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
+				} catch (UnsupportedEncodingException ignored) {
+				}
+
+				isFirst = false;
 			}
 		}
-		
+
+		HttpClientRequest req = createHttpRequest(url, "GET", responseHandler);
 		req.end();
 		
 		return this;
